@@ -1,0 +1,2853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sampurna HR Portal – Complete Process Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <style>
+        /* ════════════════════════════════════════════════════════════
+           DESIGN TOKENS — Edit color palette here.
+           To change the brand color, update --pink.
+           To change the background darkness, update --bg and --card.
+           ════════════════════════════════════════════════════════════ */
+        :root {
+            --pink:    #F2187D;   /* Primary brand / accent */
+            --purple:  #7C3AED;   /* Secondary accent */
+            --cyan:    #06B6D4;   /* Info / candidate actions */
+            --gold:    #F59E0B;   /* Warning / planned features */
+            --green:   #10B981;   /* Success / live features */
+            --red:     #EF4444;   /* Error / rejection */
+            --bg:      #07090F;   /* Page background */
+            --card:    #0D1120;   /* Card background */
+            --card2:   #111827;   /* Secondary card background */
+            --border:  rgba(255,255,255,0.08); /* Subtle divider lines */
+            --text:    #E2E8F0;   /* Primary text */
+            --muted:   #94A3B8;   /* Secondary / helper text */
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           GLOBAL RESET & BASE
+           box-sizing: border-box prevents padding from adding to widths.
+           min-width: 0 on children lets flex/grid items shrink below content size.
+           ════════════════════════════════════════════════════════════ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            min-width: 0; /* Critical: allows flex children to shrink properly */
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden; /* Prevent any accidental horizontal scroll on body */
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           HERO SECTION
+           clamp(min, preferred, max) handles font scaling across all screen sizes.
+           To change hero padding on mobile, edit the @media block near line 90.
+           ════════════════════════════════════════════════════════════ */
+        .hero {
+            background: linear-gradient(135deg, #0a0014 0%, #0d0a2e 50%, #050f1a 100%);
+            padding: clamp(36px, 6vw, 60px) clamp(16px, 5vw, 40px) clamp(30px, 5vw, 50px);
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            /* Decorative glow at top — purely cosmetic, safe to remove */
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(242,24,125,0.12), transparent);
+            pointer-events: none;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            /* clamp(min, fluid, max) — scales smoothly from mobile to desktop */
+            font-size: clamp(1.6rem, 5vw, 3.5rem);
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--pink), #c084fc, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            /* Allow long title to wrap on small screens */
+            word-break: break-word;
+        }
+        .hero p {
+            color: var(--muted);
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            margin-top: 12px;
+            position: relative;
+            /* Wrap subtitle on small screens */
+            word-break: break-word;
+        }
+
+        /* ── HERO BADGES (version, date, tags) ──
+           flex-wrap ensures badges wrap onto multiple lines on narrow screens.
+           To add a new badge: copy a <span class="badge badge-X"> element inside .badges */
+        .badges {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 20px;
+            position: relative;
+            flex-wrap: wrap; /* Always wrap — never scroll */
+            padding: 0 8px;
+        }
+        .badge {
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: clamp(0.72rem, 1.8vw, 0.8rem);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            /* Allow badge text to wrap if viewport is extremely narrow */
+            white-space: normal;
+            word-break: break-word;
+            display: inline-block;
+        }
+        /* Individual badge color variants — add new ones following this pattern */
+        .badge-pink   { background:rgba(242,24,125,0.15); color:#f472b6; border:1px solid rgba(242,24,125,0.3); }
+        .badge-cyan   { background:rgba(6,182,212,0.15);  color:#22d3ee; border:1px solid rgba(6,182,212,0.3); }
+        .badge-purple { background:rgba(124,58,237,0.15); color:#a78bfa; border:1px solid rgba(124,58,237,0.3); }
+        .badge-green  { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); }
+        .badge-gold   { background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.3); }
+        .badge-red    { background:rgba(239,68,68,0.15);  color:#f87171; border:1px solid rgba(239,68,68,0.3); }
+
+        /* ════════════════════════════════════════════════════════════
+           NAVIGATION BAR
+           sticky top-0 keeps it visible while scrolling.
+           flex-wrap wraps links to multiple rows on small screens.
+           To add a new nav link: add <a href="#section-id">Label</a> inside .nav
+           ════════════════════════════════════════════════════════════ */
+        .nav {
+            background: rgba(13,17,32,0.97);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: clamp(8px, 2vw, 14px) clamp(12px, 3vw, 40px);
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap; /* Links wrap to next line — no horizontal scroll */
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: clamp(0.72rem, 1.8vw, 0.82rem);
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            /* Allow each link to shrink — critical for very narrow screens */
+            white-space: nowrap;
+            flex-shrink: 1;
+        }
+        .nav a:hover { background: rgba(242,24,125,0.1); color: #f472b6; }
+
+        /* ════════════════════════════════════════════════════════════
+           MAIN PAGE WRAPPER
+           max-width: 1200px centres content on wide screens.
+           clamp padding adjusts side spacing for all screen sizes.
+           ════════════════════════════════════════════════════════════ */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(24px, 4vw, 50px) clamp(12px, 3vw, 30px);
+            /* Prevent any child from overflowing this container */
+            overflow-x: hidden;
+        }
+
+        section { margin-bottom: clamp(40px, 6vw, 70px); }
+
+        /* ── SECTION HEADING (h2) ──
+           .line creates the gradient underline that fades to the right.
+           To change section title size: edit font-size below. */
+        h2.section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap; /* Prevent overflow on very narrow screens */
+            word-break: break-word;
+        }
+        h2.section-title .icon { font-size: 1.5rem; flex-shrink: 0; }
+        h2.section-title .line {
+            flex: 1;
+            min-width: 40px; /* Ensure at least a small line shows */
+            height: 1px;
+            background: linear-gradient(90deg, var(--pink), transparent);
+            margin-left: 8px;
+        }
+
+        /* ── SUB-HEADING (h3) ── */
+        h3.sub-title {
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+            font-weight: 600;
+            color: var(--cyan);
+            margin: 28px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            word-break: break-word;
+        }
+
+        /* ── LEAD PARAGRAPH ── */
+        p.lead {
+            color: var(--muted);
+            font-size: clamp(0.88rem, 2vw, 1rem);
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           CARD GRID
+           auto-fit + minmax creates a responsive grid that never overflows.
+           On small screens all cards become full-width automatically.
+           To change minimum card width: edit the minmax value (currently 220px).
+           ════════════════════════════════════════════════════════════ */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: clamp(16px, 3vw, 24px);
+            transition: transform 0.2s, box-shadow 0.2s;
+            /* Allow internal text to wrap */
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .card .card-icon { font-size: 2rem; margin-bottom: 12px; }
+        .card h4 { font-size: clamp(0.88rem, 2vw, 1rem); font-weight: 700; margin-bottom: 6px; color: var(--text); }
+        .card p  { font-size: clamp(0.8rem, 1.8vw, 0.88rem); color: var(--muted); }
+        .card .who { margin-top: 10px; font-size: 0.78rem; font-weight: 600; display: flex; flex-wrap: wrap; gap: 6px; }
+
+        /* Card color accent variants — top border color only */
+        .card.pink-accent   { border-top: 3px solid var(--pink); }
+        .card.cyan-accent   { border-top: 3px solid var(--cyan); }
+        .card.purple-accent { border-top: 3px solid var(--purple); }
+        .card.green-accent  { border-top: 3px solid var(--green); }
+        .card.gold-accent   { border-top: 3px solid var(--gold); }
+
+        /* ════════════════════════════════════════════════════════════
+           MOBILE KEY SECTION (📱 Universal Key section)
+           The diagram shows mobile number → all linked records.
+           To add a new spoke item: add a <div class="spoke-item"> in .mobile-spoke
+           ════════════════════════════════════════════════════════════ */
+        .mobile-key {
+            background: linear-gradient(135deg, rgba(242,24,125,0.08), rgba(124,58,237,0.08));
+            border: 1px solid rgba(242,24,125,0.25);
+            border-radius: 16px;
+            padding: clamp(20px, 4vw, 36px);
+            margin: 20px 0;
+            word-break: break-word;
+        }
+        .mobile-key h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            color: #f472b6;
+            margin-bottom: 10px;
+        }
+        .mobile-key p { color: var(--muted); margin-bottom: 20px; }
+
+        /* Hub-and-spoke diagram layout — wraps on mobile */
+        .mobile-diagram {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 16px;
+        }
+        .mobile-center {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            border-radius: 16px;
+            padding: 16px 24px;
+            text-align: center;
+            font-weight: 700;
+            font-size: clamp(0.88rem, 2vw, 1rem);
+            color: white;
+            box-shadow: 0 0 30px rgba(242,24,125,0.4);
+            flex-shrink: 0;
+        }
+        .mobile-center small { display:block; font-size:0.75rem; font-weight:400; opacity:0.8; margin-top:4px; }
+        .mobile-spoke {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            /* max-width keeps spoke from spreading too wide on ultrawide screens */
+            max-width: min(700px, 100%);
+        }
+        .spoke-item {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: clamp(0.75rem, 1.8vw, 0.82rem);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            word-break: break-word;
+        }
+        .spoke-arrow { color: var(--pink); font-size: 1.2rem; flex-shrink: 0; }
+
+        /* ════════════════════════════════════════════════════════════
+           RULES GRID (Must / Cannot boxes)
+           Switches from 2-column to 1-column on narrow screens.
+           To add a new rule: add a <li> inside the appropriate <ul>.
+           ════════════════════════════════════════════════════════════ */
+        .rules-grid {
+            display: grid;
+            /* min(260px, 100%) ensures single column on very small screens */
+            grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .rules-box {
+            background: var(--card);
+            border-radius: 12px;
+            padding: clamp(14px, 3vw, 22px);
+            word-break: break-word;
+        }
+        .rules-box.must   { border:1px solid rgba(16,185,129,0.3); }
+        .rules-box.cannot { border:1px solid rgba(239,68,68,0.3); }
+        .rules-box h4 { font-size: clamp(0.88rem, 2vw, 1rem); font-weight: 700; margin-bottom: 14px; display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
+        .rules-box.must h4   { color: var(--green); }
+        .rules-box.cannot h4 { color: var(--red); }
+        .rules-box ul { list-style:none; }
+        .rules-box ul li {
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: clamp(0.8rem, 1.8vw, 0.88rem);
+            color: var(--muted);
+            display: flex;
+            align-items: flex-start; /* flex-start so checkmark aligns to top for wrapped text */
+            gap: 8px;
+            word-break: break-word;
+        }
+        .rules-box ul li:last-child { border: none; }
+        .rules-box.must  ul li::before { content: '✓'; color: var(--green); font-weight:700; flex-shrink: 0; }
+        .rules-box.cannot ul li::before { content: '✗'; color: var(--red); font-weight:700; flex-shrink: 0; }
+
+        /* ════════════════════════════════════════════════════════════
+           FLOWCHART (Custom HTML boxes — not Mermaid)
+           On mobile the side-by-side split stacks vertically.
+           To change box colors: edit .fbox-* classes below.
+           ════════════════════════════════════════════════════════════ */
+        .flow-container {
+            width: 100%;
+            overflow-x: hidden; /* No horizontal scroll — content adapts */
+            padding: 10px 0;
+        }
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            width: 100%;
+        }
+        .flow-row {
+            display: flex;
+            gap: 0;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap; /* Boxes wrap on narrow screens */
+        }
+        .flow-box {
+            border-radius: 12px;
+            padding: clamp(12px, 2.5vw, 16px) clamp(14px, 3vw, 22px);
+            text-align: center;
+            font-size: clamp(0.78rem, 1.8vw, 0.88rem);
+            font-weight: 600;
+            /* Width scales with screen — no fixed min-width that causes overflow */
+            width: clamp(160px, 30vw, 220px);
+            max-width: 100%;
+            line-height: 1.4;
+            position: relative;
+            word-break: break-word;
+        }
+        .flow-box small { display:block; font-weight:400; font-size:clamp(0.68rem, 1.5vw, 0.75rem); opacity:0.75; margin-top:4px; }
+
+        /* Flow box color themes */
+        .fbox-pink   { background:rgba(242,24,125,0.15); border:1.5px solid rgba(242,24,125,0.5); color:#fda4af; }
+        .fbox-cyan   { background:rgba(6,182,212,0.15);  border:1.5px solid rgba(6,182,212,0.5);  color:#67e8f9; }
+        .fbox-purple { background:rgba(124,58,237,0.15); border:1.5px solid rgba(124,58,237,0.5); color:#c4b5fd; }
+        .fbox-green  { background:rgba(16,185,129,0.15); border:1.5px solid rgba(16,185,129,0.5); color:#6ee7b7; }
+        .fbox-gold   { background:rgba(245,158,11,0.15); border:1.5px solid rgba(245,158,11,0.5); color:#fde68a; }
+        .fbox-white  { background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.15); color:var(--text); }
+        /* Diamond-shaped decision node — clip-path only works on boxes with equal-ish dimensions */
+        .fbox-decision {
+            background:rgba(245,158,11,0.12);
+            border:2px solid rgba(245,158,11,0.4);
+            color: #fde68a;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            width: clamp(120px, 22vw, 160px);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.72rem, 1.6vw, 0.82rem);
+        }
+
+        .flow-arrow       { color: var(--muted); font-size: 1.4rem; margin: 4px 0; }
+        .flow-arrow-right { color: var(--muted); font-size: 1.4rem; margin: 0 8px; }
+
+        /* Split layout — 2 branches side by side, collapses on mobile */
+        .flow-split {
+            display: flex;
+            gap: clamp(16px, 4vw, 60px);
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap; /* Wraps to stacked layout on small screens */
+            width: 100%;
+        }
+        .flow-branch { display:flex; flex-direction:column; align-items:center; gap:0; }
+        .flow-branch-label {
+            font-size: clamp(0.68rem, 1.5vw, 0.75rem);
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 999px;
+            margin-bottom: 6px;
+            white-space: nowrap;
+        }
+        .label-a { background:rgba(6,182,212,0.15); color:var(--cyan); }
+        .label-b { background:rgba(245,158,11,0.15); color:var(--gold); }
+
+        /* ════════════════════════════════════════════════════════════
+           STEP LIST (numbered process steps with icon circles)
+           To add a step: copy a <div class="step-item"> block.
+           To change the number circle color: use a different .num-* class.
+           ════════════════════════════════════════════════════════════ */
+        .step-list { display:flex; flex-direction:column; gap:14px; margin-top:20px; }
+        .step-item {
+            display: flex;
+            gap: clamp(12px, 2.5vw, 20px);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: clamp(16px, 3vw, 22px);
+            transition: border-color 0.2s;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .step-item:hover { border-color: rgba(242,24,125,0.3); }
+        .step-num {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0; /* Never shrink the number circle */
+        }
+        /* Number circle color variants */
+        .num-pink   { background:rgba(242,24,125,0.2); color:var(--pink);   border:1.5px solid rgba(242,24,125,0.4); }
+        .num-cyan   { background:rgba(6,182,212,0.2);  color:var(--cyan);   border:1.5px solid rgba(6,182,212,0.4); }
+        .num-purple { background:rgba(124,58,237,0.2); color:#a78bfa;       border:1.5px solid rgba(124,58,237,0.4); }
+        .num-green  { background:rgba(16,185,129,0.2); color:var(--green);  border:1.5px solid rgba(16,185,129,0.4); }
+        .num-gold   { background:rgba(245,158,11,0.2); color:var(--gold);   border:1.5px solid rgba(245,158,11,0.4); }
+
+        .step-content { flex: 1; min-width: 0; } /* min-width:0 lets text shrink and wrap */
+        .step-content h4 { font-size:clamp(0.88rem, 2vw, 1rem); font-weight:700; margin-bottom:6px; color:var(--text); }
+        .step-content p  { font-size:clamp(0.8rem, 1.8vw, 0.88rem); color:var(--muted); margin:0; }
+        .step-content ul { list-style:none; margin-top:10px; }
+        .step-content ul li {
+            font-size: clamp(0.78rem, 1.7vw, 0.85rem);
+            color: var(--muted);
+            padding: 4px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            word-break: break-word;
+        }
+        .step-content ul li::before { content:'›'; color:var(--pink); font-size:1.1rem; line-height:1.3; flex-shrink: 0; }
+
+        /* Who-label (Candidate / HR) inside step items */
+        .step-who {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+        }
+        .who-candidate { background:rgba(6,182,212,0.15); color:var(--cyan); }
+        .who-hr        { background:rgba(242,24,125,0.15); color:#f472b6; }
+        .who-both      { background:rgba(124,58,237,0.15); color:#a78bfa; }
+
+        /* ════════════════════════════════════════════════════════════
+           DATA TABLES — FULLY RESPONSIVE
+           
+           Strategy: On mobile (<640px), each table row is flipped into a
+           "card" using data-label attributes + ::before pseudo-elements.
+           This means NO horizontal scrolling, even on the narrowest phone.
+           
+           HOW TO ADD A NEW COLUMN:
+           1. Add <th>Column Name</th> in <thead>
+           2. Add <td data-label="Column Name">value</td> in each <tbody> row
+           
+           HOW TO CHANGE COLUMN WIDTHS:
+           Use <col> elements or set width/min-width on <th> elements for desktop.
+           ════════════════════════════════════════════════════════════ */
+
+        /* Table wrapper — prevents overflow, no horizontal scroll */
+        .table-wrap {
+            width: 100%;
+            overflow-x: hidden; /* Tables NEVER scroll horizontally */
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-top: 18px;
+        }
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            /* Force text to wrap, never overflow */
+            table-layout: fixed;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .styled-table thead tr { background:rgba(242,24,125,0.12); }
+        .styled-table th {
+            padding: clamp(10px, 2vw, 13px) clamp(10px, 2vw, 16px);
+            text-align: left;
+            font-size: clamp(0.72rem, 1.6vw, 0.82rem);
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            /* Allow header text to wrap */
+            word-break: break-word;
+            white-space: normal;
+        }
+        .styled-table td {
+            padding: clamp(10px, 2vw, 12px) clamp(10px, 2vw, 16px);
+            font-size: clamp(0.78rem, 1.8vw, 0.88rem);
+            color: var(--text);
+            border-top: 1px solid var(--border);
+            vertical-align: top;
+            /* Always wrap — never force horizontal scroll */
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        .styled-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .styled-table .form-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            word-break: normal; /* Form tags stay on one line if possible */
+        }
+        /* Badges inside tables — allow wrapping if needed */
+        .styled-table .badge {
+            white-space: normal;
+            display: inline-block;
+            word-break: normal;
+        }
+
+        /* ── RESPONSIVE TABLE: CARD FLIP LAYOUT (≤ 640px) ──
+           Each row becomes a labeled "card" block.
+           The data-label attribute on each <td> is shown as the column header.
+           Example: <td data-label="Form Name">Form 1</td>
+           ────────────────────────────────────────────────── */
+        @media (max-width: 640px) {
+            .table-wrap { border: none; border-radius: 0; }
+            .styled-table { table-layout: auto; }
+            .styled-table thead { display: none; } /* Hide column headers — labels come from data-label */
+            .styled-table tbody tr {
+                display: block;
+                margin-bottom: 12px;
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 4px 0;
+                overflow: hidden;
+            }
+            .styled-table tbody td {
+                display: flex;          /* Each cell becomes a horizontal label: value pair */
+                align-items: flex-start;
+                gap: 10px;
+                padding: 10px 14px;
+                border-top: 1px solid var(--border);
+                font-size: 0.82rem;
+            }
+            .styled-table tbody td:first-child { border-top: none; }
+            /* The column label, shown before the cell value */
+            .styled-table tbody td::before {
+                content: attr(data-label); /* Pulls text from HTML data-label attribute */
+                font-size: 0.68rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--muted);
+                min-width: 90px;        /* Fixed width so values align neatly */
+                flex-shrink: 0;
+                padding-top: 2px;       /* Optically aligns with value text */
+            }
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           NOTE / CALLOUT BOXES (warning, info, success, danger)
+           To add a new note box: use class="note-box warning|info|success|danger"
+           ════════════════════════════════════════════════════════════ */
+        .note-box {
+            border-radius: 12px;
+            padding: clamp(14px, 3vw, 18px) clamp(16px, 3vw, 22px);
+            margin: 20px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            word-break: break-word;
+        }
+        .note-box.warning { background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); }
+        .note-box.info    { background:rgba(6,182,212,0.08);  border:1px solid rgba(6,182,212,0.25); }
+        .note-box.success { background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); }
+        .note-box.danger  { background:rgba(239,68,68,0.08);  border:1px solid rgba(239,68,68,0.25); }
+        .note-icon { font-size: 1.4rem; flex-shrink: 0; }
+        .note-content { flex: 1; min-width: 0; }
+        .note-content h5 { font-size:clamp(0.82rem, 1.8vw, 0.88rem); font-weight:700; margin-bottom:4px; }
+        .note-content p  { font-size:clamp(0.78rem, 1.7vw, 0.85rem); color:var(--muted); margin:0; word-break: break-word; }
+        .note-box.warning .note-content h5 { color: var(--gold); }
+        .note-box.info    .note-content h5 { color: var(--cyan); }
+        .note-box.success .note-content h5 { color: var(--green); }
+        .note-box.danger  .note-content h5 { color: var(--red); }
+
+        /* ════════════════════════════════════════════════════════════
+           COMPARISON GRID (Online vs Walk-In)
+           2-column on desktop, single-column on mobile.
+           To change the breakpoint: edit the max-width in the @media block.
+           ════════════════════════════════════════════════════════════ */
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .compare-col {
+            background: var(--card);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            word-break: break-word;
+        }
+        .compare-header {
+            padding: clamp(12px, 2.5vw, 16px) clamp(14px, 3vw, 22px);
+            font-weight: 700;
+            font-size: clamp(0.88rem, 2vw, 1rem);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .compare-header.online { background:rgba(6,182,212,0.12); color:var(--cyan); }
+        .compare-header.walkin { background:rgba(245,158,11,0.12); color:var(--gold); }
+        .compare-body { padding: clamp(14px, 3vw, 20px) clamp(14px, 3vw, 22px); }
+        .compare-step {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+        .compare-step:last-child { border: none; }
+        .compare-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .compare-num.c { background:rgba(6,182,212,0.2); color:var(--cyan); }
+        .compare-num.w { background:rgba(245,158,11,0.2); color:var(--gold); }
+        .compare-step p { font-size:clamp(0.78rem, 1.7vw, 0.85rem); color:var(--muted); word-break: break-word; }
+
+        /* ════════════════════════════════════════════════════════════
+           LINK CHAIN (Form 1 → Form 2 → Form 3 visual)
+           On mobile, boxes stack vertically with arrow below each.
+           ════════════════════════════════════════════════════════════ */
+        .link-chain {
+            display: flex;
+            flex-wrap: wrap;      /* Wrap items on narrow screens */
+            align-items: center;
+            gap: 0;
+            padding: 16px 0;
+            margin-top: 16px;
+            justify-content: flex-start;
+            overflow-x: hidden;   /* Never scroll horizontally */
+        }
+        .chain-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: clamp(8px, 2vw, 12px) clamp(12px, 2.5vw, 18px);
+            text-align: center;
+            font-size: clamp(0.75rem, 1.6vw, 0.82rem);
+            font-weight: 600;
+            /* Allow text to wrap inside chain box */
+            white-space: normal;
+            word-break: break-word;
+            flex: 1 1 auto;       /* Grow and shrink to fit available space */
+            min-width: 80px;
+            max-width: 200px;
+        }
+        .chain-arrow {
+            color: var(--pink);
+            font-size: 1.2rem;
+            padding: 0 4px;
+            flex-shrink: 0;
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           COMING SOON BANNER (for planned feature sections)
+           To change the accent color: update the border-left color.
+           ════════════════════════════════════════════════════════════ */
+        .coming-soon-banner {
+            background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.08));
+            border: 1px solid rgba(245,158,11,0.3);
+            border-left: 4px solid var(--gold);
+            border-radius: 12px;
+            padding: clamp(12px, 2.5vw, 16px) clamp(14px, 3vw, 22px);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+            word-break: break-word;
+        }
+        .coming-soon-banner .cs-icon { font-size: 1.6rem; flex-shrink: 0; }
+        .coming-soon-banner h5 { font-size: clamp(0.82rem, 1.8vw, 0.9rem); font-weight: 700; color: var(--gold); margin-bottom: 3px; }
+        .coming-soon-banner p { font-size: clamp(0.76rem, 1.6vw, 0.83rem); color: var(--muted); margin: 0; }
+
+        /* ════════════════════════════════════════════════════════════
+           STATUS PIPELINE (Applied → Eligible → ... → Onboarded)
+           flex-wrap means pills flow onto multiple rows naturally.
+           To add a new stage: add a <div class="status-pill"> and <span class="status-arrow">
+           ════════════════════════════════════════════════════════════ */
+        .status-pipeline {
+            display: flex;
+            flex-wrap: wrap;      /* Pills wrap to new lines — never scroll */
+            gap: 6px;
+            align-items: center;
+            margin: 20px 0;
+            padding: 8px 0;
+        }
+        .status-pill {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: clamp(0.72rem, 1.6vw, 0.78rem);
+            font-weight: 600;
+            color: var(--muted);
+            white-space: nowrap;
+            word-break: normal;
+        }
+        .status-pill.active  { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4);  color: var(--green); }
+        .status-pill.planned { background: rgba(245,158,11,0.1);  border-color: rgba(245,158,11,0.3);  color: var(--gold); }
+        .status-arrow { color: var(--pink); font-size: 0.9rem; padding: 0 2px; flex-shrink: 0; }
+
+        /* ════════════════════════════════════════════════════════════
+           PLANNED FEATURE CARDS (gold-accented, in roadmap section)
+           Uses same card-grid layout — auto-fit handles responsiveness.
+           To add a planned feature: copy a <div class="planned-card"> block.
+           ════════════════════════════════════════════════════════════ */
+        .planned-card {
+            background: var(--card);
+            border: 1px solid rgba(245,158,11,0.25);
+            border-top: 3px solid var(--gold);
+            border-radius: 14px;
+            padding: clamp(16px, 3vw, 22px);
+            word-break: break-word;
+        }
+        .planned-card .pcard-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap: wrap; }
+        .planned-card .pcard-icon { font-size:1.8rem; flex-shrink: 0; }
+        .planned-card h4 { font-size:clamp(0.88rem, 2vw, 1rem); font-weight:700; color: var(--text); }
+        .planned-card p { font-size:clamp(0.78rem, 1.7vw, 0.85rem); color: var(--muted); margin-bottom:10px; }
+        .planned-card ul { list-style:none; }
+        .planned-card ul li {
+            font-size:clamp(0.75rem, 1.6vw, 0.82rem);
+            color: var(--muted);
+            padding:4px 0;
+            display:flex;
+            gap:8px;
+            align-items:flex-start;
+            word-break: break-word;
+        }
+        .planned-card ul li::before { content:'›'; color:var(--gold); font-size:1rem; line-height:1.3; flex-shrink:0; }
+
+        /* ════════════════════════════════════════════════════════════
+           ROLE GRID (HR roles — HR Manager, Recruiter, etc.)
+           auto-fit handles all screen sizes.
+           To add a new role: copy a <div class="role-card"> block.
+           ════════════════════════════════════════════════════════════ */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+        .role-card { background: var(--card2); border:1px solid var(--border); border-radius:12px; padding:16px; word-break: break-word; }
+        .role-card .role-badge { font-size:0.72rem; font-weight:700; padding:2px 10px; border-radius:999px; display:inline-block; margin-bottom:8px; }
+        .role-card h5 { font-size:clamp(0.82rem, 1.8vw, 0.9rem); font-weight:700; margin-bottom:4px; color:var(--text); }
+        .role-card p  { font-size:clamp(0.75rem, 1.6vw, 0.8rem); color:var(--muted); }
+
+        /* ════════════════════════════════════════════════════════════
+           FOOTER
+           ════════════════════════════════════════════════════════════ */
+        footer {
+            text-align: center;
+            padding: clamp(24px, 5vw, 40px);
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: clamp(0.78rem, 1.7vw, 0.85rem);
+            word-break: break-word;
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           MERMAID DIAGRAM WRAPPER
+           overflow-x: auto here allows the Mermaid SVG to scroll if it's
+           very complex. The SVG itself is responsive via max-width: 100%.
+           ════════════════════════════════════════════════════════════ */
+        .mermaid-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: clamp(16px, 3vw, 32px);
+            margin-top: 20px;
+            overflow-x: auto; /* Mermaid SVGs can be complex — allow scroll if needed */
+        }
+        .mermaid-section .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        /* Force Mermaid SVG to scale down on small screens */
+        .mermaid svg { max-width: 100% !important; height: auto !important; }
+
+        /* ════════════════════════════════════════════════════════════
+           RESPONSIVE BREAKPOINTS
+           
+           480px  — Very small phones (Galaxy A series, older iPhones)
+           640px  — Standard mobile (most Android / iPhone)
+           768px  — Large phones, small tablets (iPad mini portrait)
+           1024px — Tablets in landscape, small laptops
+           
+           All layout adjustments live here. The components above use
+           clamp() for fluid sizing, so breakpoints are only needed for
+           structural layout changes.
+           ════════════════════════════════════════════════════════════ */
+
+        /* ── 1024px and below (tablet landscape / small laptop) ── */
+        @media (max-width: 1024px) {
+            /* Table layout: give all columns equal share */
+            .styled-table { table-layout: auto; }
+        }
+
+        /* ── 768px and below (tablet portrait / large phone) ── */
+        @media (max-width: 768px) {
+            /* Flowchart split: stack branches vertically */
+            .flow-split { flex-direction: column; gap: 16px; align-items: center; }
+
+            /* Mobile key diagram: arrow becomes top/bottom */
+            .mobile-diagram { flex-direction: column; }
+            .spoke-arrow { transform: rotate(90deg); } /* ↓ instead of → */
+
+            /* Nav: tighter gap */
+            .nav { gap: 3px; }
+
+            /* Section titles: hide the decorative line on very narrow */
+            h2.section-title .line { display: none; }
+        }
+
+        /* ── 480px and below (small phones — Galaxy A, older iPhones) ── */
+        @media (max-width: 480px) {
+            /* Step items: stack number circle above text */
+            .step-item { flex-direction: column; gap: 10px; }
+            .step-num { width: 36px; height: 36px; font-size: 0.88rem; }
+
+            /* Coming-soon banner: stack icon above text */
+            .coming-soon-banner { flex-direction: column; gap: 8px; }
+
+            /* Note boxes: tighten padding */
+            .note-box { flex-direction: column; gap: 8px; }
+            .note-icon { font-size: 1.1rem; }
+
+            /* Mobile key: full-width boxes */
+            .mobile-center { width: 100%; }
+            .mobile-spoke  { width: 100%; }
+            .spoke-item    { flex: 1 1 calc(50% - 8px); justify-content: center; }
+
+            /* Chain boxes: go full width, arrow rotates */
+            .link-chain { flex-direction: column; align-items: stretch; }
+            .chain-box  { max-width: 100%; }
+            .chain-arrow { transform: rotate(90deg); align-self: center; }
+
+            /* Status pipeline: arrows are optional visual — shrink them */
+            .status-arrow { font-size: 0.75rem; padding: 0; }
+
+            /* Flow boxes: full width on tiny screens */
+            .flow-box { width: 100%; max-width: 100%; }
+            .flowchart { width: 100%; }
+        }
+
+        /* ── Print media query (if document is ever printed / saved as PDF) ── */
+        @media print {
+            .nav { position: static; }
+            .hero { padding: 20px; }
+            .card:hover { transform: none; }
+            body { background: white; color: black; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+<div class="hero">
+    <h1>📱 Sampurna HR Portal</h1>
+    <p>Complete Process Guide — How candidates move from Application to Onboarding</p>
+    <div class="badges">
+        <span class="badge badge-pink">Version 3.0</span>
+        <span class="badge badge-cyan">Updated: February 2026</span>
+        <span class="badge badge-purple">Two Paths: Online &amp; Walk-In</span>
+        <span class="badge badge-green">Mobile Number Linked</span>
+        <span class="badge badge-gold">Full Pipeline: Application → Onboarding</span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════ NAV ═══════════════════════════ -->
+<nav class="nav">
+    <a href="#overview">Overview</a>
+    <a href="#mobile-key">📱 Mobile Key</a>
+    <a href="#two-paths">Two Entry Paths</a>
+    <a href="#full-flowchart">Full Flowchart</a>
+    <a href="#path-a">Part A – Online</a>
+    <a href="#path-b">Part B – Walk-In</a>
+    <a href="#bg-verification">🔍 BG Verification</a>
+    <a href="#offer-letter">📄 Offer Letter</a>
+    <a href="#induction">🏢 Induction Day</a>
+    <a href="#forms-table">All Forms</a>
+    <a href="#form-details">📋 Form Fields</a>
+    <a href="#dashboard">HR Dashboard</a>
+    <a href="#notifications">Notifications</a>
+    <a href="#analytics">📊 Analytics</a>
+    <a href="#rules">Rules</a>
+    <a href="#planned">🔜 Planned</a>
+</nav>
+
+<div class="page">
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<section id="overview">
+    <h2 class="section-title"><span class="icon">🏢</span> System Overview <span class="line"></span></h2>
+    <p class="lead">The Sampurna HR Portal manages everything from the moment a candidate finds a job, to their final onboarding. There are two ways a candidate can enter the system — either <strong>Online</strong> (via LinkedIn, job portals) or by walking directly into the office. The complete journey has <strong>8 stages</strong>.</p>
+
+    <!-- Candidate Status Pipeline -->
+    <div class="status-pipeline">
+        <div class="status-pill active">📋 Applied</div><span class="status-arrow">→</span>
+        <div class="status-pill active">✅ Eligible</div><span class="status-arrow">→</span>
+        <div class="status-pill active">📅 Scheduled</div><span class="status-arrow">→</span>
+        <div class="status-pill active">🏢 Checked In</div><span class="status-arrow">→</span>
+        <div class="status-pill active">🎤 Interviewed</div><span class="status-arrow">→</span>
+        <div class="status-pill active">🏆 Selected</div><span class="status-arrow">→</span>
+        <div class="status-pill planned">🔍 BG Verified</div><span class="status-arrow">→</span>
+        <div class="status-pill planned">📄 Offer Sent</div><span class="status-arrow">→</span>
+        <div class="status-pill planned">✅ Offer Accepted</div><span class="status-arrow">→</span>
+        <div class="status-pill active">🎉 Onboarded</div>
+    </div>
+    <p style="font-size:0.78rem; color:var(--muted); margin-bottom:24px;">
+        <span style="color:var(--green);">●</span> Green = Currently Live &nbsp;&nbsp;
+        <span style="color:var(--gold);">●</span> Gold = Planned (In Development)
+    </p>
+
+    <div class="card-grid">
+        <div class="card pink-accent">
+            <div class="card-icon">📋</div>
+            <h4>Form 1 – Application</h4>
+            <p>Candidate fills online application from job portal link. Uploads resume &amp; certificates.</p>
+            <div class="who"><span class="badge badge-cyan">Candidate fills</span> <span class="badge badge-green">Live</span></div>
+        </div>
+        <div class="card cyan-accent">
+            <div class="card-icon">📝</div>
+            <h4>Form 2 – Screening Details</h4>
+            <p>Candidate scans QR at office on interview day. Fills CTC, DOB, Aadhaar, PAN and other screening details.</p>
+            <div class="who"><span class="badge badge-cyan">Candidate fills at office</span> <span class="badge badge-green">Live</span></div>
+        </div>
+        <div class="card purple-accent">
+            <div class="card-icon">🎤</div>
+            <h4>Form 3 – Interview</h4>
+            <p>HR conducts interview, fills evaluation scores and updates interview status.</p>
+            <div class="who"><span class="badge badge-pink">HR fills</span> <span class="badge badge-green">Live</span></div>
+        </div>
+        <div class="card green-accent">
+            <div class="card-icon">✅</div>
+            <h4>Form 4 – Final Onboarding</h4>
+            <p>Selected candidates fill this final 10-step form to complete their joining details.</p>
+            <div class="who"><span class="badge badge-cyan">Candidate fills</span> <span class="badge badge-green">Live</span></div>
+        </div>
+        <div class="card gold-accent">
+            <div class="card-icon">🚶</div>
+            <h4>Walk-In Form</h4>
+            <p>Replaces Form 1 for candidates who come directly to the office without prior application.</p>
+            <div class="who"><span class="badge badge-cyan">Candidate fills</span> <span class="badge badge-green">Live</span></div>
+        </div>
+        <div class="card pink-accent">
+            <div class="card-icon">🖥️</div>
+            <h4>HR Dashboard</h4>
+            <p>Central control panel where HR reviews documents, schedules interviews, and makes decisions.</p>
+            <div class="who"><span class="badge badge-pink">HR uses</span> <span class="badge badge-green">Live</span></div>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--gold);">
+            <div class="card-icon">🔍</div>
+            <h4>Background Verification</h4>
+            <p>Post-selection BG check tracking — status updates, document uploads, clearance workflow.</p>
+            <div class="who"><span class="badge badge-pink">HR manages</span> <span class="badge badge-gold">🔜 Planned</span></div>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--gold);">
+            <div class="card-icon">📄</div>
+            <h4>Offer Letter Generation</h4>
+            <p>Auto-generates PDF offer letter with role, salary, joining date. Sends to candidate via email.</p>
+            <div class="who"><span class="badge badge-pink">HR triggers</span> <span class="badge badge-gold">🔜 Planned</span></div>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--gold);">
+            <div class="card-icon">📊</div>
+            <h4>Analytics & Reporting</h4>
+            <p>Pipeline funnel, time-to-hire metrics, interview quality scores, source effectiveness reports.</p>
+            <div class="who"><span class="badge badge-pink">HR / Manager</span> <span class="badge badge-gold">🔜 Planned</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ MOBILE KEY ═══════════════════════════ -->
+<section id="mobile-key">
+    <h2 class="section-title"><span class="icon">🔑</span> The Mobile Number — Universal Key <span class="line"></span></h2>
+    <p class="lead">The mobile number a candidate enters in their very first form becomes their <strong>permanent unique identity</strong> throughout the entire system. Every record, form, document, and communication is tied to it.</p>
+
+    <div class="mobile-key">
+        <h3>📱 One Mobile Number = One Complete Candidate Profile</h3>
+        <p>Think of it like a file number in a filing cabinet — every document about you goes into the same file.</p>
+
+        <div class="mobile-diagram">
+            <div class="mobile-center">
+                📱 Mobile Number
+                <small>e.g. 9876543210</small>
+            </div>
+            <span class="spoke-arrow">→</span>
+            <div class="mobile-spoke">
+                <div class="spoke-item">📋 Form 1 Application</div>
+                <div class="spoke-item">🚶 Walk-In Form</div>
+                <div class="spoke-item">📄 Resume & Certificates</div>
+                <div class="spoke-item">📝 Form 2 Screening Details</div>
+                <div class="spoke-item">📅 Interview Schedule</div>
+                <div class="spoke-item">🎫 QR Check-in</div>
+                <div class="spoke-item">🎤 Form 3 Evaluation</div>
+                <div class="spoke-item">🏆 HR Decision</div>
+                <div class="spoke-item">💬 WhatsApp Messages</div>
+                <div class="spoke-item">📧 Email Notifications</div>
+                <div class="spoke-item">🔍 BG Verification</div>
+                <div class="spoke-item">📄 Offer Letter</div>
+                <div class="spoke-item">✅ Form 4 Onboarding</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rules-grid">
+        <div class="rules-box must">
+            <h4>✅ Mobile Number MUST be:</h4>
+            <ul>
+                <li>Exactly 10 digits</li>
+                <li>A valid Indian mobile number</li>
+                <li>Active and reachable by the candidate</li>
+                <li>Owned by the candidate personally</li>
+                <li>The same number used in every form</li>
+            </ul>
+        </div>
+        <div class="rules-box cannot">
+            <h4>❌ Mobile Number CANNOT:</h4>
+            <ul>
+                <li>Be shared by two different candidates</li>
+                <li>Be changed after Form 1 is submitted</li>
+                <li>Be a temporary or fake number</li>
+                <li>Belong to someone else (e.g. a relative)</li>
+                <li>Be different in Form 2 vs Form 1</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="note-box danger">
+        <div class="note-icon">⚠️</div>
+        <div class="note-content">
+            <h5>Critical Rule</h5>
+            <p>If a candidate uses a different mobile number in Form 2 than they used in Form 1, the system will NOT link their records together. Their interview cannot proceed. Always use the same number from start to finish.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ TWO PATHS ═══════════════════════════ -->
+<section id="two-paths">
+    <h2 class="section-title"><span class="icon">🔀</span> Two Ways to Enter the System <span class="line"></span></h2>
+    <p class="lead">Every candidate enters through one of two paths. Both paths eventually merge at the interview stage.</p>
+
+    <div class="compare-grid">
+        <div class="compare-col">
+            <div class="compare-header online">🌐 Part A — Online Application</div>
+            <div class="compare-body">
+                <div class="compare-step">
+                    <div class="compare-num c">1</div>
+                    <p>Candidate finds job on LinkedIn or job portal and fills <strong>Form 1</strong> from the link</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num c">2</div>
+                    <p>HR reviews resume &amp; certificates on dashboard</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num c">3</div>
+                    <p>HR schedules interview date, time, location</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num c">4</div>
+                    <p>HR sends WhatsApp interview notification</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num c">5</div>
+                    <p>Candidate arrives, scans QR, fills <strong>Form 2</strong></p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num c">6</div>
+                    <p>HR conducts interview via <strong>Form 3</strong></p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num c">7</div>
+                    <p>HR updates decision in Decision Panel</p>
+                </div>
+                <div class="compare-step" style="opacity:0.6; border-left:2px solid var(--gold); margin-left:4px; padding-left:12px;">
+                    <div class="compare-num c" style="background:rgba(245,158,11,0.2); color:var(--gold); border-color:rgba(245,158,11,0.4);">8</div>
+                    <p>🔜 HR initiates <strong>Background Verification</strong></p>
+                </div>
+                <div class="compare-step" style="opacity:0.6; border-left:2px solid var(--gold); margin-left:4px; padding-left:12px;">
+                    <div class="compare-num c" style="background:rgba(245,158,11,0.2); color:var(--gold); border-color:rgba(245,158,11,0.4);">9</div>
+                    <p>🔜 HR generates &amp; sends <strong>Offer Letter</strong> via email</p>
+                </div>
+                <div class="compare-step" style="opacity:0.6; border-left:2px solid var(--gold); margin-left:4px; padding-left:12px;">
+                    <div class="compare-num c" style="background:rgba(245,158,11,0.2); color:var(--gold); border-color:rgba(245,158,11,0.4);">10</div>
+                    <p>🔜 Candidate accepts offer online</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num c">11</div>
+                    <p>Selected candidate fills <strong>Form 4</strong> on induction day</p>
+                </div>
+            </div>
+        </div>
+        <div class="compare-col">
+            <div class="compare-header walkin">🚶 Part B — Walk-In Interview</div>
+            <div class="compare-body">
+                <div class="compare-step">
+                    <div class="compare-num w">1</div>
+                    <p>Candidate arrives directly at office for walk-in interview</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num w">2</div>
+                    <p>Candidate scans QR code and fills the <strong>Walk-In Form</strong> (with mobile number)</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num w">3</div>
+                    <p>HR conducts interview (uses Form 3 evaluation)</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num w">4</div>
+                    <p>HR updates decision in Decision Panel</p>
+                </div>
+                <div class="compare-step" style="opacity:0.6; border-left:2px solid var(--gold); margin-left:4px; padding-left:12px;">
+                    <div class="compare-num w" style="background:rgba(245,158,11,0.2); color:var(--gold); border-color:rgba(245,158,11,0.4);">5</div>
+                    <p>🔜 HR initiates <strong>Background Verification</strong></p>
+                </div>
+                <div class="compare-step" style="opacity:0.6; border-left:2px solid var(--gold); margin-left:4px; padding-left:12px;">
+                    <div class="compare-num w" style="background:rgba(245,158,11,0.2); color:var(--gold); border-color:rgba(245,158,11,0.4);">6</div>
+                    <p>🔜 HR generates &amp; sends <strong>Offer Letter</strong> via email</p>
+                </div>
+                <div class="compare-step" style="opacity:0.6; border-left:2px solid var(--gold); margin-left:4px; padding-left:12px;">
+                    <div class="compare-num w" style="background:rgba(245,158,11,0.2); color:var(--gold); border-color:rgba(245,158,11,0.4);">7</div>
+                    <p>🔜 Candidate accepts offer online</p>
+                </div>
+                <div class="compare-step">
+                    <div class="compare-num w">8</div>
+                    <p>Selected candidate fills <strong>Form 4</strong> (linked by same mobile number from Walk-In Form)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ FULL FLOWCHART ═══════════════════════════ -->
+<section id="full-flowchart">
+    <h2 class="section-title"><span class="icon">📊</span> Complete Process Flowchart <span class="line"></span></h2>
+    <p class="lead">This shows the full journey of both paths from start to finish. Both paths merge at the HR Interview stage.</p>
+
+    <div class="flow-container">
+        <div class="flowchart">
+
+            <!-- START -->
+            <div class="flow-row">
+                <div class="flow-box fbox-white">🏁 Candidate Wants to Apply</div>
+            </div>
+            <div class="flow-arrow">↓</div>
+
+            <!-- SPLIT -->
+            <div class="flow-row">
+                <div class="flow-box fbox-gold">
+                    ❓ How does candidate apply?
+                </div>
+            </div>
+            <div class="flow-arrow">↓</div>
+
+            <div class="flow-split">
+                <!-- BRANCH A -->
+                <div class="flow-branch">
+                    <div class="flow-branch-label label-a">🌐 PART A — Online</div>
+                    <div class="flow-box fbox-cyan">
+                        📋 FORM 1
+                        <small>Candidate fills Application Form<br/>Uploads Resume + Certificates<br/>Enters Mobile Number</small>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box fbox-pink">
+                        🖥️ HR Dashboard
+                        <small>HR reviews resume &amp; certificates</small>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box fbox-pink">
+                        📅 HR Schedules Interview
+                        <small>Sets date, time &amp; location<br/>in Form 1 Review section</small>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box fbox-pink">
+                        💬 WhatsApp Notification Sent
+                        <small>HR sends interview invite<br/>to candidate via WhatsApp</small>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box fbox-cyan">
+                        🏢 Candidate Arrives at Office
+                        <small>Scans QR Code</small>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box fbox-cyan">
+                        📝 FORM 2
+                        <small>Filled at office<br/>SAME mobile number as Form 1 ⚠️</small>
+                    </div>
+                </div>
+
+                <!-- BRANCH B -->
+                <div class="flow-branch">
+                    <div class="flow-branch-label label-b">🚶 PART B — Walk-In</div>
+                    <div class="flow-box fbox-gold">
+                        🏢 Candidate Arrives at Office
+                        <small>Walks in directly</small>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box fbox-cyan">
+                        🚶 Walk-In Form
+                        <small>Scans QR code<br/>Enters mobile number<br/>(becomes unique identifier)</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MERGE -->
+            <div class="flow-arrow">↓</div>
+            <div class="flow-row">
+                <div class="flow-box fbox-purple">
+                    🤝 BOTH PATHS MERGE HERE
+                    <small>All candidates proceed to interview</small>
+                </div>
+            </div>
+            <div class="flow-arrow">↓</div>
+
+            <!-- FORM 3 -->
+            <div class="flow-row">
+                <div class="flow-box fbox-pink">
+                    🎤 FORM 3 – HR Interview
+                    <small>HR opens dashboard → Form 3<br/>Selects candidate → Conducts interview<br/>Fills evaluation → Updates status</small>
+                </div>
+            </div>
+            <div class="flow-arrow">↓</div>
+
+            <!-- DECISION -->
+            <div class="flow-row">
+                <div class="flow-box fbox-pink">
+                    🏆 HR Decision Panel
+                    <small>HR reviews all candidates<br/>Selects &amp; marks qualified candidates<br/>Updates final decision status</small>
+                </div>
+            </div>
+            <div class="flow-arrow">↓</div>
+
+            <!-- EMAIL -->
+            <div class="flow-row">
+                <div class="flow-box fbox-pink">
+                    📧 HR Sends Selection Email
+                    <small>Goes to Email Messages section<br/>Selects successful candidates<br/>Sends selection notification</small>
+                </div>
+            </div>
+            <div class="flow-arrow">↓</div>
+
+            <!-- FORM 4 -->
+            <div class="flow-row">
+                <div class="flow-box fbox-green">
+                    ✅ FORM 4 – Final Onboarding
+                    <small>Selected candidate comes to office<br/>Fills Form 4<br/>Linked by same mobile number</small>
+                </div>
+            </div>
+            <div class="flow-arrow">↓</div>
+
+            <!-- END -->
+            <div class="flow-row">
+                <div class="flow-box fbox-green">
+                    🎉 Candidate Successfully Joined!
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ MERMAID END-TO-END ═══════════════════════════ -->
+<section id="mermaid-flowchart">
+    <h2 class="section-title"><span class="icon">📊</span> End-to-End Recruitment Diagram <span class="line"></span></h2>
+    <p class="lead">This diagram shows the complete recruitment journey — from vacancy identification all the way to final onboarding — in a single view. Decision points (diamond shapes) show where the process can branch.</p>
+
+    <div class="note-box info" style="margin-bottom:20px;">
+        <div class="note-icon">🎨</div>
+        <div class="note-content">
+            <h5>How to Read This Diagram</h5>
+            <p><strong>Blue boxes</strong> = Candidate & initial HR steps &nbsp;|&nbsp; <strong>Purple boxes</strong> = Interview stage &nbsp;|&nbsp; <strong>Yellow boxes</strong> = Decision points &nbsp;|&nbsp; <strong>Yellow/Lime boxes</strong> = Post-selection steps &nbsp;|&nbsp; <strong>Green boxes</strong> = Onboarding &nbsp;|&nbsp; <strong>Red boxes</strong> = Rejection. Diamond shapes (◇) are YES/NO decision points.</p>
+        </div>
+    </div>
+
+
+    <!-- Legend table -->
+    <h3 class="sub-title">🗺️ Diagram Legend — What Each Stage Means</h3>
+    <div class="table-wrap"><table class="styled-table">
+        <thead>
+            <tr>
+                <th>Stage</th>
+                <th>Who Does It</th>
+                <th>What Happens</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-label="Stage">🎯 Vacancy Identification</td>
+                <td data-label="Who Does It">HR / Management</td>
+                <td data-label="What Happens">HR identifies an open position that needs to be filled</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📱 WhatsApp Campaign</td>
+                <td data-label="Who Does It">HR</td>
+                <td data-label="What Happens">HR spreads the job opening via WhatsApp, LinkedIn, and job portals</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📝 CV Submission</td>
+                <td data-label="Who Does It">Candidate</td>
+                <td data-label="What Happens">Candidate sends their CV / resume in the given link</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📋 Form-1 Basic Details</td>
+                <td data-label="Who Does It">Candidate</td>
+                <td data-label="What Happens">Candidate fills Form 1 online — personal details, mobile number, uploads resume & certificates</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">✅ Eligibility Check</td>
+                <td data-label="Who Does It">HR</td>
+                <td data-label="What Happens">HR reviews Form 1 and documents to decide if the candidate meets the job requirements</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">❌ Rejected</td>
+                <td data-label="Who Does It">System / HR</td>
+                <td data-label="What Happens">Candidate does not meet eligibility criteria — process ends here for them</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📅 Interview Scheduled</td>
+                <td data-label="Who Does It">HR</td>
+                <td data-label="What Happens">HR sets date, time, and location for the interview and saves it in the dashboard</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">🏢 Interview Day – QR Check-in</td>
+                <td data-label="Who Does It">Candidate</td>
+                <td data-label="What Happens">Candidate arrives at office on interview day and scans the QR code to check in</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">❓ Candidate Type?</td>
+                <td data-label="Who Does It">System (automatic)</td>
+                <td data-label="What Happens">System identifies whether this is a pre-screened (online) candidate or a walk-in candidate</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📋 Form-2 Link Only (Screened)</td>
+                <td data-label="Who Does It">Candidate</td>
+                <td data-label="What Happens">Online candidates: Form 2 is linked to their existing Form 1 using the same mobile number</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📋 Form-1 + Form-2 Links (Walk-in)</td>
+                <td data-label="Who Does It">Candidate</td>
+                <td data-label="What Happens">Walk-in candidates: Both Walk-In Form (equivalent to Form 1) and Form 2 are created and linked together</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">🎤 Interview Evaluation</td>
+                <td data-label="Who Does It">HR</td>
+                <td data-label="What Happens">HR conducts the actual interview — asks questions, assesses skills and fit</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📋 Form-3 Submission</td>
+                <td data-label="Who Does It">HR</td>
+                <td data-label="What Happens">HR fills in the interview evaluation scores, remarks, and submits Form 3 via the dashboard</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">❓ Selection Decision</td>
+                <td data-label="Who Does It">HR</td>
+                <td data-label="What Happens">HR reviews all Form 3 results in the Decision Panel and decides who is selected</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">🔍 Background Verification <span class="badge badge-gold">🔜 Future</span></td>
+                <td data-label="Who Does It">HR / Management</td>
+                <td data-label="What Happens">Selected candidate's background, references, and documents are verified. HR tracks status (In Progress → Cleared / Failed) in the dashboard.</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📤 Data Upload to HRMS/Octane <span class="badge badge-gold">🔜 Planned</span></td>
+                <td data-label="Who Does It">HR</td>
+                <td data-label="What Happens">Candidate's data is exported to the HR Management System for formal employee record creation. But currently user can download data in hrms uploadable format</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📄 Offer Letter Generation <span class="badge badge-gold">🔜 Planned</span></td>
+                <td data-label="Who Does It">HR / System</td>
+                <td data-label="What Happens">The official offer letter is auto-generated as a PDF with role, salary, and joining date. </td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📧 Offer Sent to Candidate <span class="badge badge-gold">🔜 Planned</span></td>
+                <td data-label="Who Does It">System / n8n</td>
+                <td data-label="What Happens">The offer letter PDF is sent to the candidate via email. Candidate can accept or reject via an online link. Offer is valid for 7 days.</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">🏢 Candidate Joins – Induction </td>
+                <td data-label="Who Does It">HR + Candidate</td>
+                <td data-label="What Happens">Candidate arrives for their first day. HR communicates induction date via WhatsApp/email. On induction day, candidate scans a second QR code to trigger Form 4.</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">📋 Form-4 Onboarding</td>
+                <td data-label="Who Does It">Candidate</td>
+                <td data-label="What Happens">Candidate fills Form 4 — the final onboarding form. Linked automatically via mobile number</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">🎉 Onboarding Complete</td>
+                <td data-label="Who Does It">System</td>
+                <td data-label="What Happens">Candidate is now fully onboarded. Their complete journey is recorded and linked in the system</td>
+            </tr>
+        </tbody>
+    </table></div>
+</section>
+
+<!-- ═══════════════════════════ PATH A DETAILED ═══════════════════════════ -->
+<section id="path-a">
+    <h2 class="section-title"><span class="icon">🌐</span> Part A — Online Application: Step-by-Step <span class="line"></span></h2>
+    <p class="lead">For candidates who find the job on LinkedIn, Naukri, or other job portals and apply through the online link.</p>
+
+    <div class="step-list">
+        <!-- Step 1 -->
+        <div class="step-item">
+            <div class="step-num num-cyan">1</div>
+            <div class="step-content">
+                <div class="step-who who-candidate">👤 Candidate</div>
+                <h4>Candidate Finds Job and Fills Form 1 (Application Form)</h4>
+                <p>The candidate discovers the job posting on LinkedIn or another portal, clicks the application link, and fills Form 1 — the Candidate Application Form.</p>
+                <ul>
+                    <li>Must enter their mobile number (this becomes the permanent unique ID) & other basic details</li>
+                    <li>Uploads their resume</li>
+                    <li>Uploads their certificates</li>
+                    <li>All future records will be linked using this mobile number</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-item">
+            <div class="step-num num-pink">2</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Reviews Candidate Documents</h4>
+                <p>HR logs into the Dashboard and goes to the <strong>Candidate Documents</strong> section to review the application.</p>
+                <ul>
+                    <li>View the candidate's resume</li>
+                    <li>View and download certificates</li>
+                    <li>Assess whether the candidate is suitable for an interview</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-item">
+            <div class="step-num num-pink">3</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Schedules the Interview</h4>
+                <p>HR goes to the <strong>Form 1 Review</strong> section on the dashboard and sets up the interview.</p>
+                <ul>
+                    <li>Selects the candidate(s) to invite</li>
+                    <li>Sets the interview date</li>
+                    <li>Sets the interview time</li>
+                    <li>Sets the interview location</li>
+                    <li>Saves the schedule</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-item">
+            <div class="step-num num-pink">4</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Sends Interview Notification via WhatsApp</h4>
+                <p>HR goes to the <strong>WhatsApp Messages</strong> section, selects the scheduled candidates, and sends the interview invitation message via WhatsApp.</p>
+                <ul>
+                    <li>Candidate receives interview date, time, and location on WhatsApp</li>
+                    <li>Message is sent directly from the system</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step-item">
+            <div class="step-num num-cyan">5</div>
+            <div class="step-content">
+                <div class="step-who who-candidate">👤 Candidate</div>
+                <h4>Candidate Arrives and Fills Form 2</h4>
+                <p>On interview day, the candidate comes to the office, scans the QR code, and fills <strong>Form 2</strong>.</p>
+                <ul>
+                    <li>⚠️ Must use the <strong>exact same mobile number</strong> as used in Form 1</li>
+                    <li>Form 2 is automatically linked to Form 1 using the mobile number</li>
+                    <li>No new mobile number is allowed — this will break the link</li>
+                </ul>
+            </div>
+        </div>
+        <div class="note-box warning">
+            <div class="note-icon">⚠️</div>
+            <div class="note-content">
+                <h5>Important: Same Mobile Number Required</h5>
+                <p>If the candidate enters a different mobile number in Form 2, the system cannot link it to their Form 1 application. The HR will not be able to find their records during the interview. Always use the same number.</p>
+            </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step-item">
+            <div class="step-num num-pink">6</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Conducts Interview using Form 3</h4>
+                <p>HR opens the Dashboard, goes to <strong>Form 3 (Interview Form)</strong>, selects the candidate, and conducts the interview.</p>
+                <ul>
+                    <li>Asks questions and evaluates the candidate</li>
+                    <li>Fills in the interview evaluation scores and remarks</li>
+                    <li>Updates the interview status after completion</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="step-item">
+            <div class="step-num num-pink">7</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Updates Final Decision in HR Decision Panel</h4>
+                <p>After all interviews are done, HR goes to the <strong>HR Decision Panel</strong> on the dashboard.</p>
+                <ul>
+                    <li>Reviews all interviewed candidates</li>
+                    <li>Selects the qualified/successful candidates</li>
+                    <li>Marks them as selected</li>
+                    <li>Updates the final decision status for each candidate</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="step-item">
+            <div class="step-num num-pink">8</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Sends Selection Email</h4>
+                <p>HR goes to the <strong>Email Messages</strong> section, selects the chosen candidates, and sends the official selection email notification.</p>
+                <ul>
+                    <li>Candidate receives a selection confirmation email</li>
+                    <li>Email informs them of next steps</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 9 – PLANNED -->
+        <div class="step-item" style="border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04);">
+            <div class="step-num" style="background:rgba(245,158,11,0.2); color:var(--gold); border:1.5px solid rgba(245,158,11,0.4);">9</div>
+            <div class="step-content">
+                <div class="step-who" style="background:rgba(245,158,11,0.15); color:var(--gold);">🔜 HR — Coming Soon</div>
+                <h4>HR Initiates Background Verification <span class="badge badge-gold">🔜 Planned</span></h4>
+                <p>HR opens the <strong>Background Verification</strong> module and initiates the BG check for selected candidates.</p>
+                <ul>
+                    <li>Status set to: <strong>BG Verification Pending → In Progress</strong></li>
+                    <li>HR uploads verification documents when received</li>
+                    <li>If BG is <strong>Cleared</strong> → system proceeds to offer generation</li>
+                    <li>If BG <strong>Failed</strong> → candidate is notified and application is closed</li>
+                    <li>Expected completion: within 7 days of selection</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 10 – PLANNED -->
+        <div class="step-item" style="border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04);">
+            <div class="step-num" style="background:rgba(245,158,11,0.2); color:var(--gold); border:1.5px solid rgba(245,158,11,0.4);">10</div>
+            <div class="step-content">
+                <div class="step-who" style="background:rgba(245,158,11,0.15); color:var(--gold);">🔜 System/HR — Coming Soon</div>
+                <h4>Offer Letter Generated &amp; Sent <span class="badge badge-gold">🔜 Planned</span></h4>
+                <p>Once BG is cleared, the system auto-generates a PDF offer letter and sends it to the candidate via email.</p>
+                <ul>
+                    <li>Offer letter contains: role, salary, joining date, terms &amp; conditions</li>
+                    <li>Candidate receives email with PDF attachment or secure download link</li>
+                    <li>Offer is valid for <strong>7 days</strong></li>
+                    <li>Reminder emails are sent 2 days and 1 day before expiry</li>
+                    <li>Candidate can accept or reject offer via online portal</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 11 – PLANNED -->
+        <div class="step-item" style="border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04);">
+            <div class="step-num" style="background:rgba(245,158,11,0.2); color:var(--gold); border:1.5px solid rgba(245,158,11,0.4);">11</div>
+            <div class="step-content">
+                <div class="step-who" style="background:rgba(245,158,11,0.15); color:var(--gold);">🔜 Candidate + HR — Coming Soon</div>
+                <h4>Candidate Accepts Offer &amp; Induction Day QR Check-in <span class="badge badge-gold">🔜 Planned</span></h4>
+                <p>Candidate accepts the offer online. HR sets the induction date and sends notification via WhatsApp/email.</p>
+                <ul>
+                    <li>Candidate accepts online → status becomes <strong>Offer Accepted</strong></li>
+                    <li>HR communicates induction date, time, venue via WhatsApp &amp; email</li>
+                    <li>On induction day, a <strong>second QR code</strong> is generated (separate from interview QR)</li>
+                    <li>Candidate scans the induction QR code at the office → Form 4 link is automatically sent</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 12 -->
+        <div class="step-item">
+            <div class="step-num num-green">12</div>
+            <div class="step-content">
+                <div class="step-who who-candidate">👤 Candidate</div>
+                <h4>Selected Candidate Fills Form 4 (Final Onboarding Form)</h4>
+                <p>The selected candidate fills <strong>Form 4</strong>, the comprehensive 10-step final onboarding form, on induction day.</p>
+                <ul>
+                    <li>Uses the same mobile number from Form 1 — Form 4 is automatically linked</li>
+                    <li>Collects: bank details, address, qualifications, skills, family info, job preferences</li>
+                    <li>This completes the candidate's full journey in the system</li>
+                    <li>Status updated to: <strong>ONBOARDED</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ PATH B DETAILED ═══════════════════════════ -->
+<section id="path-b">
+    <h2 class="section-title"><span class="icon">🚶</span> Part B — Walk-In Interview: Step-by-Step <span class="line"></span></h2>
+    <p class="lead">For candidates who come directly to the office without any prior online application. They skip Form 1 and Form 2, and start with the Walk-In Form instead.</p>
+
+    <div class="step-list">
+        <!-- Step 1 -->
+        <div class="step-item">
+            <div class="step-num num-gold">1</div>
+            <div class="step-content">
+                <div class="step-who who-candidate">👤 Candidate</div>
+                <h4>Candidate Arrives Directly at Office</h4>
+                <p>The candidate walks into the office to attend a walk-in interview. They have not applied online beforehand. They receive a QR code at the reception.</p>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-item">
+            <div class="step-num num-gold">2</div>
+            <div class="step-content">
+                <div class="step-who who-candidate">👤 Candidate</div>
+                <h4>Candidate Fills the Walk-In Form</h4>
+                <p>The candidate scans the QR code and fills the Walk-In Form on their phone or a kiosk.</p>
+                <ul>
+                    <li>Enters their mobile number — this becomes their unique identifier</li>
+                    <li>Fills in personal and professional details</li>
+                    <li>This Walk-In Form is their starting record (equivalent to Form 1 for online candidates)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-item">
+            <div class="step-num num-pink">3</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Conducts Interview</h4>
+                <p>HR conducts the interview with the walk-in candidate and fills the interview evaluation (this is the equivalent of Form 3 for walk-in candidates).</p>
+                <ul>
+                    <li>Assesses the candidate's skills and suitability</li>
+                    <li>Fills in scores and remarks</li>
+                    <li>Updates the interview status</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-item">
+            <div class="step-num num-pink">4</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Updates Final Decision</h4>
+                <p>HR opens the Dashboard and goes to the <strong>HR Decision Panel</strong>.</p>
+                <ul>
+                    <li>Reviews walk-in candidates alongside online candidates</li>
+                    <li>Selects qualified candidates</li>
+                    <li>Marks them and updates decision status</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step-item">
+            <div class="step-num num-pink">5</div>
+            <div class="step-content">
+                <div class="step-who who-hr">🧑‍💼 HR</div>
+                <h4>HR Sends Selection Email</h4>
+                <p>HR goes to the <strong>Email Messages</strong> section and sends the selection email to successful walk-in candidates, just like for online candidates.</p>
+            </div>
+        </div>
+
+        <!-- Step 6 – PLANNED -->
+        <div class="step-item" style="border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04);">
+            <div class="step-num" style="background:rgba(245,158,11,0.2); color:var(--gold); border:1.5px solid rgba(245,158,11,0.4);">6</div>
+            <div class="step-content">
+                <div class="step-who" style="background:rgba(245,158,11,0.15); color:var(--gold);">🔜 HR — Coming Soon</div>
+                <h4>HR Initiates Background Verification <span class="badge badge-gold">🔜 Planned</span></h4>
+                <p>Same BG verification process as online candidates — HR initiates and tracks the background check for the selected walk-in candidate.</p>
+                <ul>
+                    <li>Status: BG Pending → In Progress → Cleared or Failed</li>
+                    <li>If cleared → offer letter is generated</li>
+                    <li>If failed → candidate is notified, application closed</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 7 – PLANNED -->
+        <div class="step-item" style="border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04);">
+            <div class="step-num" style="background:rgba(245,158,11,0.2); color:var(--gold); border:1.5px solid rgba(245,158,11,0.4);">7</div>
+            <div class="step-content">
+                <div class="step-who" style="background:rgba(245,158,11,0.15); color:var(--gold);">🔜 System — Coming Soon</div>
+                <h4>Offer Letter Generated &amp; Sent <span class="badge badge-gold">🔜 Planned</span></h4>
+                <p>After BG clearance, the offer letter is auto-generated and sent to the walk-in candidate by email. Same 7-day validity and acceptance flow as online path.</p>
+            </div>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="step-item">
+            <div class="step-num num-green">8</div>
+            <div class="step-content">
+                <div class="step-who who-candidate">👤 Candidate</div>
+                <h4>Selected Candidate Fills Form 4 on Induction Day</h4>
+                <p>The selected walk-in candidate fills <strong>Form 4</strong> for final onboarding on their induction day.</p>
+                <ul>
+                    <li>⚠️ Must use the <strong>same mobile number</strong> used during Walk-In Form registration</li>
+                    <li>Form 4 is automatically linked to their Walk-In record via mobile number</li>
+                    <li>Onboarding is now complete — status set to <strong>ONBOARDED</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ BACKGROUND VERIFICATION ═══════════════════════════ -->
+<section id="bg-verification">
+    <h2 class="section-title"><span class="icon">🔍</span> Background Verification <span class="line"></span></h2>
+
+    <div class="coming-soon-banner">
+        <div class="cs-icon">🔜</div>
+        <div>
+            <h5>Planned Feature — Not Yet Live</h5>
+            <p>The Background Verification module is designed and documented in the system specs but has not been deployed yet. This section describes how it will work once implemented.</p>
+        </div>
+    </div>
+
+    <p class="lead">After a candidate is marked as <strong>Selected</strong> in the HR Decision Panel, the next mandatory step is Background Verification (BG Verification) before an offer letter can be issued. This is a manual process managed by HR.</p>
+
+    <h3 class="sub-title">🔄 BG Verification Status Flow</h3>
+    <div class="status-pipeline">
+        <div class="status-pill planned">✅ Selected</div><span class="status-arrow">→</span>
+        <div class="status-pill planned">⏳ BG Pending</div><span class="status-arrow">→</span>
+        <div class="status-pill planned">🔍 In Progress</div><span class="status-arrow">→</span>
+        <div class="status-pill planned">✅ BG Cleared</div><span class="status-arrow">→</span>
+        <div class="status-pill active">📄 Offer Generated</div>
+    </div>
+    <p style="font-size:0.82rem; color:var(--red); margin-bottom:20px;">⚠️ If BG <strong>fails</strong> → candidate is notified and application is permanently closed.</p>
+
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Step</th><th>Who</th><th>Action</th><th>System Status</th></tr></thead>
+        <tbody>
+            <tr>
+                <td data-label="Step"><strong>1. Initiate BG Check</strong></td>
+                <td data-label="Who">🧑‍💼 HR</td>
+                <td data-label="Action">HR opens the BG Verification module from the dashboard, selects the candidate, and starts the verification process. A notification is sent to the candidate about next steps.</td>
+                <td data-label="System Status"><span class="badge badge-gold">bg_verification_pending</span></td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>2. Verification In Progress</strong></td>
+                <td data-label="Who">🧑‍💼 HR / Verifier</td>
+                <td data-label="Action">HR or designated background verifier checks references, previous employer records, identity documents, and criminal history. Expected completion: 7 business days.</td>
+                <td data-label="System Status"><span class="badge badge-cyan">bg_in_progress</span></td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>3a. BG Cleared</strong></td>
+                <td data-label="Who">🧑‍💼 HR</td>
+                <td data-label="Action">HR marks BG as cleared, uploads verification report. System automatically triggers offer letter generation. Candidate status updated.</td>
+                <td data-label="System Status"><span class="badge badge-green">bg_cleared → offer_generation</span></td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>3b. BG Failed</strong></td>
+                <td data-label="Who">🧑‍💼 HR</td>
+                <td data-label="Action">HR marks BG as failed with reason. System sends rejection notification to candidate via email. Application is archived. No offer is generated.</td>
+                <td data-label="System Status"><span class="badge badge-red">bg_failed → rejected</span></td>
+            </tr>
+        </tbody>
+    </table></div>
+
+    <div class="note-box warning">
+        <div class="note-icon">⚠️</div>
+        <div class="note-content">
+            <h5>Business Rule</h5>
+            <p>All selected candidates MUST undergo background verification before an offer letter can be generated. This cannot be skipped (HR Manager can extend timeline but not bypass the step).</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ OFFER LETTER ═══════════════════════════ -->
+<section id="offer-letter">
+    <h2 class="section-title"><span class="icon">📄</span> Offer Letter Generation &amp; Acceptance <span class="line"></span></h2>
+
+    <div class="coming-soon-banner">
+        <div class="cs-icon">🔜</div>
+        <div>
+            <h5>Planned Feature — Not Yet Live</h5>
+            <p>Offer letter generation and online acceptance is part of the planned Phase 1 delivery. This section describes the intended workflow.</p>
+        </div>
+    </div>
+
+    <p class="lead">Once background verification is cleared, the system automatically generates a professional PDF offer letter and delivers it to the candidate by email. The candidate can accept or reject the offer via an online portal link.</p>
+
+    <div class="card-grid">
+        <div class="card" style="border-top:3px solid var(--cyan);">
+            <div class="card-icon">📝</div>
+            <h4>What's in the Offer Letter</h4>
+            <p>Candidate's full name and position, CTC and salary breakdown, joining date, department and branch, terms and conditions, and HR contact details.</p>
+        </div>
+        <div class="card" style="border-top:3px solid var(--purple);">
+            <div class="card-icon">📦</div>
+            <h4>How It's Generated</h4>
+            <p>FastAPI generates the PDF from a pre-approved template. The letter is stored securely in Supabase Storage and sent as an email attachment via the n8n automation system.</p>
+        </div>
+        <div class="card" style="border-top:3px solid var(--green);">
+            <div class="card-icon">✅</div>
+            <h4>Offer Validity</h4>
+            <p>Offer is valid for <strong>7 days</strong> from the date of sending. Automated reminder emails are sent 2 days and 1 day before expiry. HR Manager can extend validity.</p>
+        </div>
+    </div>
+
+    <h3 class="sub-title">📧 Offer Letter Flow</h3>
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Step</th><th>Who</th><th>Action</th></tr></thead>
+        <tbody>
+            <tr>
+                <td data-label="Step"><strong>1. Auto-Generation</strong></td>
+                <td data-label="Who">🤖 System</td>
+                <td data-label="Action">Upon BG clearance, system fills offer template with candidate data, generates PDF, and stores in secure cloud storage.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>2. Email Delivery</strong></td>
+                <td data-label="Who">🤖 n8n Automation</td>
+                <td data-label="Action">Candidate receives email with: congratulations message, offer letter PDF link, acceptance deadline (7 days), and an "Accept Offer" button/link.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>3. Candidate Accepts</strong></td>
+                <td data-label="Who">👤 Candidate</td>
+                <td data-label="Action">Candidate clicks "Accept Offer" on the online portal → status updated to <strong>Offer Accepted</strong>. HR receives notification. Onboarding process begins.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>4. Candidate Rejects</strong></td>
+                <td data-label="Who">👤 Candidate</td>
+                <td data-label="Action">Candidate declines → HR is notified with reason. Application status set to <strong>Offer Rejected</strong>. HR can decide whether to re-offer or close.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>5. Offer Expires</strong></td>
+                <td data-label="Who">🤖 System</td>
+                <td data-label="Action">If no response within 7 days, system auto-marks as <strong>Offer Expired</strong>. HR is notified. Escalation workflow triggered.</td>
+            </tr>
+        </tbody>
+    </table></div>
+</section>
+
+<!-- ═══════════════════════════ INDUCTION DAY ═══════════════════════════ -->
+<section id="induction">
+    <h2 class="section-title"><span class="icon">🏢</span> Induction Day &amp; Form 4 Trigger <span class="line"></span></h2>
+
+    <div class="coming-soon-banner">
+        <div class="cs-icon">🔜</div>
+        <div>
+            <h5>Induction QR Check-in — Planned Feature</h5>
+            <p>The induction day QR check-in is a planned feature. Currently, Form 4 is accessible directly. Once this feature is live, Form 4 will only be triggered after scanning the induction QR code.</p>
+        </div>
+    </div>
+
+    <p class="lead">After a candidate accepts their offer, HR schedules their induction (first) day. On induction day, the candidate scans a <strong>second QR code</strong> (different from the interview day QR) — this triggers delivery of the Form 4 link. This ensures Form 4 is only filled after the candidate physically arrives for joining.</p>
+
+    <h3 class="sub-title">📅 Induction Day Timeline</h3>
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Timing</th><th>Action</th><th>Who</th></tr></thead>
+        <tbody>
+            <tr>
+                <td data-label="Timing">After Offer Accepted</td>
+                <td data-label="Action">HR sends induction details: date, time, venue, list of documents to bring</td>
+                <td data-label="Who">🧑‍💼 HR (via WhatsApp + Email)</td>
+            </tr>
+            <tr>
+                <td data-label="Timing">Day Before Induction</td>
+                <td data-label="Action">Automated reminder with induction venue and instructions is sent</td>
+                <td data-label="Who">🤖 System / n8n</td>
+            </tr>
+            <tr>
+                <td data-label="Timing">Induction Day – Arrival</td>
+                <td data-label="Action">Candidate arrives at office and scans the <strong>Induction QR Code</strong> (printed at reception)</td>
+                <td data-label="Who">👤 Candidate</td>
+            </tr>
+            <tr>
+                <td data-label="Timing">After QR Scan</td>
+                <td data-label="Action">System sends Form 4 link to the candidate's mobile number automatically</td>
+                <td data-label="Who">🤖 System</td>
+            </tr>
+            <tr>
+                <td data-label="Timing">During Induction</td>
+                <td data-label="Action">Candidate fills Form 4 — the comprehensive 10-step onboarding form (bank details, family info, address, skills, etc.)</td>
+                <td data-label="Who">👤 Candidate</td>
+            </tr>
+            <tr>
+                <td data-label="Timing">After Form 4 Submitted</td>
+                <td data-label="Action">Status set to <strong>ONBOARDED</strong>. Data prepared for HRMS/Octane export. Congratulations notification sent.</td>
+                <td data-label="Who">🤖 System</td>
+            </tr>
+        </tbody>
+    </table></div>
+
+    <div class="note-box info">
+        <div class="note-icon">💡</div>
+        <div class="note-content">
+            <h5>Two Different QR Codes</h5>
+            <p>The system uses <strong>two separate QR codes</strong> at different stages: (1) <strong>Interview Day QR</strong> — scanned at the office on interview day to check in and get Form 2 access. (2) <strong>Induction Day QR</strong> — scanned on joining day to trigger Form 4. Both are single-use and expire after a set time period.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ ANALYTICS ═══════════════════════════ -->
+<section id="analytics">
+    <h2 class="section-title"><span class="icon">📊</span> Analytics &amp; Reporting Dashboard <span class="line"></span></h2>
+
+    <div class="coming-soon-banner">
+        <div class="cs-icon">🔜</div>
+        <div>
+            <h5>Planned Feature — Not Yet Live</h5>
+            <p>The Analytics and Reporting dashboard is designed in the HLD/SRS and planned for Phase 1 delivery. This section describes the intended capabilities.</p>
+        </div>
+    </div>
+
+    <p class="lead">The Analytics module will provide HR managers and leadership with real-time recruitment intelligence — giving visibility into the entire hiring pipeline, interview quality, and process efficiency.</p>
+
+    <div class="card-grid">
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">🔽</div><h4>Pipeline Funnel</h4></div>
+            <p>Visual funnel showing candidate count at each stage: Applied → Eligible → Scheduled → Interviewed → Selected → Onboarded.</p>
+            <ul>
+                <li>Stage-by-stage conversion rates</li>
+                <li>Drop-off analysis at each step</li>
+                <li>Filterable by date range, department, branch</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">⏱️</div><h4>Time-to-Hire</h4></div>
+            <p>Average, median, min, max time from CV submission to offer acceptance.</p>
+            <ul>
+                <li>Sub-stage breakdown (application → interview, interview → selection, etc.)</li>
+                <li>Target: reduce time-to-hire by 30%</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">📈</div><h4>Source Effectiveness</h4></div>
+            <p>Which channels bring the best candidates: WhatsApp, Walk-In, LinkedIn, Naukri, Referral?</p>
+            <ul>
+                <li>Application count and selection rate by source</li>
+                <li>Quality score per source</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">🎯</div><h4>Interview Quality</h4></div>
+            <p>Analysis of Form 3 evaluation scores across candidates, interviewers, and positions.</p>
+            <ul>
+                <li>Average scores by designation/department</li>
+                <li>Panel consistency analysis</li>
+                <li>Score distribution charts</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">🎫</div><h4>QR Check-in Stats</h4></div>
+            <p>Interview attendance tracking via QR scan data.</p>
+            <ul>
+                <li>No-show rates by date and location</li>
+                <li>Walk-in vs screened candidate ratio</li>
+                <li>QR scan log audit trail</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">📁</div><h4>Report Exports</h4></div>
+            <p>Download reports in multiple formats for sharing with management.</p>
+            <ul>
+                <li>Export as CSV, Excel (XLSX), or PDF</li>
+                <li>Scheduled auto-reports (weekly/monthly)</li>
+                <li>Department-wise hiring trends</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ FORMS TABLE ═══════════════════════════ -->
+<section id="forms-table">
+    <h2 class="section-title"><span class="icon">📋</span> All Forms — Quick Reference Table <span class="line"></span></h2>
+    <p class="lead">A complete summary of all forms in the system — who fills them, where, and what they are for.</p>
+
+    <div class="table-wrapper">
+        <div class="table-wrap"><table class="styled-table">
+            <thead>
+                <tr>
+                    <th>FORM</th>
+                    <th>NAME</th>
+                    <th>WHO FILLS IT</th>
+                    <th>WHERE / HOW</th>
+                    <th>PURPOSE</th>
+                    <th>PATH</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-label="FORM"><span class="badge badge-cyan">Form 1</span></td>
+                    <td data-label="NAME"><strong>Application Form</strong></td>
+                    <td data-label="WHO FILLS IT">Candidate</td>
+                    <td data-label="WHERE / HOW">Online, from job portal link</td>
+                    <td data-label="PURPOSE">Initial application; uploads resume & certificates; sets mobile number as ID</td>
+                    <td data-label="PATH"><span class="badge badge-cyan">Online only</span></td>
+                </tr>
+                <tr>
+                    <td data-label="FORM"><span class="badge badge-gold">Walk-In</span></td>
+                    <td data-label="NAME"><strong>Walk-In Registration Form</strong></td>
+                    <td data-label="WHO FILLS IT">Candidate</td>
+                    <td data-label="WHERE / HOW">Office; scans QR code</td>
+                    <td data-label="PURPOSE">Entry form for direct walk-in candidates; sets mobile number as ID</td>
+                    <td data-label="PATH"><span class="badge badge-gold">Walk-In only</span></td>
+                </tr>
+                <tr>
+                    <td data-label="FORM"><span class="badge badge-cyan">Form 2</span></td>
+                    <td data-label="NAME"><strong>Office Entry / Screening Form</strong></td>
+                    <td data-label="WHO FILLS IT">Candidate</td>
+                    <td data-label="WHERE / HOW">Office on interview day; scans QR code</td>
+                    <td data-label="PURPOSE">Links arrival at office to Form 1 application; must use same mobile</td>
+                    <td data-label="PATH"><span class="badge badge-cyan">Online only</span></td>
+                </tr>
+                <tr>
+                    <td data-label="FORM"><span class="badge badge-purple">Form 3</span></td>
+                    <td data-label="NAME"><strong>Interview Evaluation Form</strong></td>
+                    <td data-label="WHO FILLS IT">HR</td>
+                    <td data-label="WHERE / HOW">HR Dashboard → Form 3 section</td>
+                    <td data-label="PURPOSE">HR conducts interview, fills scores, evaluation remarks and status</td>
+                    <td data-label="PATH"><span class="badge badge-purple">Both paths</span></td>
+                </tr>
+                <tr>
+                    <td data-label="FORM"><span class="badge badge-green">Form 4</span></td>
+                    <td data-label="NAME"><strong>Final Onboarding Form</strong></td>
+                    <td data-label="WHO FILLS IT">Candidate</td>
+                    <td data-label="WHERE / HOW">Office; after receiving selection email</td>
+                    <td data-label="PURPOSE">Final onboarding data; linked via same mobile number; completes joining</td>
+                    <td data-label="PATH"><span class="badge badge-green">Both paths</span></td>
+                </tr>
+            </tbody>
+        </table></div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════ HR DASHBOARD ═══════════════════════════ -->
+<section id="dashboard">
+    <h2 class="section-title"><span class="icon">🖥️</span> HR Dashboard — What HR Can Do <span class="line"></span></h2>
+    <p class="lead">The HR Dashboard is the central command centre. All HR actions happen here. Here is a breakdown of each section of the dashboard and what it is used for.</p>
+
+    <div class="table-wrap"><table class="styled-table">
+        <thead>
+            <tr>
+                <th>Dashboard Section</th>
+                <th>Status</th>
+                <th>What HR Can Do</th>
+                <th>When to Use</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-label="Dashboard Section"><strong>📂 Candidate Documents</strong></td>
+                <td data-label="Status"><span class="badge badge-green">Live</span></td>
+                <td data-label="What HR Can Do">View resume, view certificates, download resume, download certificates</td>
+                <td data-label="When to Use">After candidate submits Form 1, before scheduling interview</td>
+            </tr>
+            <tr>
+                <td data-label="Dashboard Section"><strong>📋 Form 1 Review</strong></td>
+                <td data-label="Status"><span class="badge badge-green">Live</span></td>
+                <td data-label="What HR Can Do">Select candidates, set interview date/time/location, save schedule</td>
+                <td data-label="When to Use">After reviewing documents; to invite candidates for interview</td>
+            </tr>
+            <tr>
+                <td data-label="Dashboard Section"><strong>💬 WhatsApp Messages</strong></td>
+                <td data-label="Status"><span class="badge badge-green">Live</span></td>
+                <td data-label="What HR Can Do">Select scheduled candidates, send interview invitation via WhatsApp</td>
+                <td data-label="When to Use">After scheduling interview; to notify candidates</td>
+            </tr>
+            <tr>
+                <td data-label="Dashboard Section"><strong>🎤 Form 3 (Interview)</strong></td>
+                <td data-label="Status"><span class="badge badge-green">Live</span></td>
+                <td data-label="What HR Can Do">Select candidate, fill interview evaluation, update interview status</td>
+                <td data-label="When to Use">On the day of the interview, while conducting it</td>
+            </tr>
+            <tr>
+                <td data-label="Dashboard Section"><strong>🏆 HR Decision Panel</strong></td>
+                <td data-label="Status"><span class="badge badge-green">Live</span></td>
+                <td data-label="What HR Can Do">Review all candidates, select qualified ones, mark selected, update status</td>
+                <td data-label="When to Use">After all interviews are completed</td>
+            </tr>
+            <tr>
+                <td data-label="Dashboard Section"><strong>📧 Email Messages</strong></td>
+                <td data-label="Status"><span class="badge badge-green">Live</span></td>
+                <td data-label="What HR Can Do">Select successful candidates, send official selection email</td>
+                <td data-label="When to Use">After HR Decision Panel is finalized</td>
+            </tr>
+            <tr style="opacity:0.75;">
+                <td data-label="Dashboard Section"><strong>🔍 Background Verification Panel</strong></td>
+                <td data-label="Status"><span class="badge badge-gold">🔜 Planned</span></td>
+                <td data-label="What HR Can Do">Initiate BG check, track status (Pending → In Progress → Cleared/Failed), upload verification documents, mark outcome</td>
+                <td data-label="When to Use">After HR Decision Panel; for all selected candidates before offer is generated</td>
+            </tr>
+            <tr style="opacity:0.75;">
+                <td data-label="Dashboard Section"><strong>📄 Offer Letter Management</strong></td>
+                <td data-label="Status"><span class="badge badge-gold">🔜 Planned</span></td>
+                <td data-label="What HR Can Do">Review auto-generated offer letters, approve for sending, track acceptance/rejection status, extend offer validity</td>
+                <td data-label="When to Use">After BG clearance; to send and track offers</td>
+            </tr>
+            <tr style="opacity:0.75;">
+                <td data-label="Dashboard Section"><strong>📅 Induction Scheduling</strong></td>
+                <td data-label="Status"><span class="badge badge-gold">🔜 Planned</span></td>
+                <td data-label="What HR Can Do">Set induction date, generate induction QR code, send induction details to candidates via WhatsApp/email</td>
+                <td data-label="When to Use">After offer acceptance; before candidate's first day</td>
+            </tr>
+            <tr style="opacity:0.75;">
+                <td data-label="Dashboard Section"><strong>📊 Analytics &amp; Reports</strong></td>
+                <td data-label="Status"><span class="badge badge-gold">🔜 Planned</span></td>
+                <td data-label="What HR Can Do">View pipeline funnel, time-to-hire metrics, source effectiveness, interview quality scores; export reports as CSV/Excel/PDF</td>
+                <td data-label="When to Use">Ongoing — for recruitment performance monitoring</td>
+            </tr>
+        </tbody>
+    </table></div>
+
+    <h3 class="sub-title">👥 HR User Roles (RBAC)</h3>
+    <p class="lead">The system supports multiple HR roles with different levels of access. Currently, basic HR access is live. Granular role-based access is planned.</p>
+    <div class="role-grid">
+        <div class="role-card">
+            <span class="role-badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);">Super Admin</span>
+            <h5>System Administrator</h5>
+            <p>Full access. User provisioning, config management, environment settings.<span class="badge badge-gold">🔜 Planned</span></p>
+        </div>
+        <div class="role-card">
+            <span class="role-badge" style="background:rgba(245,158,11,0.15); color:var(--gold); border:1px solid rgba(245,158,11,0.3);">HR Manager</span>
+            <h5>HR Manager</h5>
+            <p>Final selection decisions, BG verification approvals, offer letter approval, analytics reports.<span class="badge badge-gold">🔜 Planned</span></p>
+        </div>
+        <div class="role-card">
+            <span class="role-badge" style="background:rgba(6,182,212,0.15); color:var(--cyan); border:1px solid rgba(6,182,212,0.3);">Recruiter</span>
+            <h5>Recruiter / HR Staff</h5>
+            <p>Screening candidates, scheduling interviews, QR management, WhatsApp notifications.<span class="badge badge-gold">🔜 Planned</span></p>
+        </div>
+        <div class="role-card">
+            <span class="role-badge" style="background:rgba(124,58,237,0.15); color:#a78bfa; border:1px solid rgba(124,58,237,0.3);">Interviewer</span>
+            <h5>Interview Panel</h5>
+            <p>View assigned candidates only. Fill Form 3 evaluations. QR check-in validation.<span class="badge badge-gold">🔜 Planned</span></p>
+        </div>
+        <div class="role-card">
+            <span class="role-badge" style="background:rgba(16,185,129,0.15); color:var(--green); border:1px solid rgba(16,185,129,0.3);">BG Verifier</span>
+            <h5>Background Verifier</h5>
+            <p>Update BG check statuses and upload verification documents for assigned candidates. <span class="badge badge-gold">🔜 Planned</span></p>
+        </div>
+        <div class="role-card">
+            <span class="role-badge" style="background:rgba(255,255,255,0.08); color:var(--muted); border:1px solid var(--border);">Audit</span>
+            <h5>Compliance / Audit</h5>
+            <p>Read-only access to audit logs, QR access history, and compliance reports. <span class="badge badge-gold">🔜 Planned</span></p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════ NOTIFICATIONS TABLE ═══════════════════════════ -->
+<section id="notifications">
+    <h2 class="section-title"><span class="icon">🔔</span> Notifications — What Gets Sent and When <span class="line"></span></h2>
+    <p class="lead">The system sends automated messages to candidates at two key moments in the process.</p>
+
+    <div class="table-wrap"><table class="styled-table">
+        <thead>
+            <tr>
+                <th>Notification</th>
+                <th>Channel</th>
+                <th>Sent By</th>
+                <th>Sent When</th>
+                <th>What Candidate Receives</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-label="Notification"><strong>Interview Invitation</strong></td>
+                <td data-label="Channel">💬 WhatsApp</td>
+                <td data-label="Sent By">HR (from Dashboard)</td>
+                <td data-label="Sent When">After HR schedules interview</td>
+                <td data-label="What Candidate Receives">Date, time, and location of their interview</td>
+            </tr>
+            <tr>
+                <td data-label="Notification"><strong>Selection Notification</strong></td>
+                <td data-label="Channel">📧 Email</td>
+                <td data-label="Sent By">HR (from Dashboard)</td>
+                <td data-label="Sent When">After HR Decision Panel</td>
+                <td data-label="What Candidate Receives">Confirmation that they are selected; instructions for next steps</td>
+            </tr>
+            <tr style="opacity:0.7;">
+                <td data-label="Notification"><strong>Rejection Notification <span class="badge badge-gold" style="font-size:0.7rem;">🔜 Planned</span></strong></td>
+                <td data-label="Channel">📧 Email + 💬 WhatsApp</td>
+                <td data-label="Sent By">System / n8n</td>
+                <td data-label="Sent When">After rejection decision (eligibility or post-interview)</td>
+                <td data-label="What Candidate Receives">Polite rejection message; encouragement to apply in future</td>
+            </tr>
+            <tr style="opacity:0.7;">
+                <td data-label="Notification"><strong>Interview Reminder <span class="badge badge-gold" style="font-size:0.7rem;">🔜 Planned</span></strong></td>
+                <td data-label="Channel">💬 WhatsApp + 📧 Email</td>
+                <td data-label="Sent By">System / n8n</td>
+                <td data-label="Sent When">24 hours before scheduled interview</td>
+                <td data-label="What Candidate Receives">Reminder with date, time, venue, and instructions</td>
+            </tr>
+            <tr style="opacity:0.7;">
+                <td data-label="Notification"><strong>BG Verification Update <span class="badge badge-gold" style="font-size:0.7rem;">🔜 Planned</span></strong></td>
+                <td data-label="Channel">💬 WhatsApp + 📧 Email</td>
+                <td data-label="Sent By">System / n8n</td>
+                <td data-label="Sent When">When BG verification is initiated; when completed</td>
+                <td data-label="What Candidate Receives">Status update on background check progress</td>
+            </tr>
+            <tr style="opacity:0.7;">
+                <td data-label="Notification"><strong>Offer Letter <span class="badge badge-gold" style="font-size:0.7rem;">🔜 Planned</span></strong></td>
+                <td data-label="Channel">📧 Email (primary)</td>
+                <td data-label="Sent By">System / n8n</td>
+                <td data-label="Sent When">When BG is cleared and offer letter is generated</td>
+                <td data-label="What Candidate Receives">Congratulations + PDF offer letter + acceptance link (valid 7 days)</td>
+            </tr>
+            <tr style="opacity:0.7;">
+                <td data-label="Notification"><strong>Offer Expiry Reminder <span class="badge badge-gold" style="font-size:0.7rem;">🔜 Planned</span></strong></td>
+                <td data-label="Channel">📧 Email + 💬 WhatsApp</td>
+                <td data-label="Sent By">System / n8n</td>
+                <td data-label="Sent When">2 days and 1 day before offer expiry</td>
+                <td data-label="What Candidate Receives">Reminder to accept/reject offer before deadline</td>
+            </tr>
+            <tr style="opacity:0.7;">
+                <td data-label="Notification"><strong>Induction Day Details <span class="badge badge-gold" style="font-size:0.7rem;">🔜 Planned</span></strong></td>
+                <td data-label="Channel">💬 WhatsApp + 📧 Email</td>
+                <td data-label="Sent By">HR / n8n</td>
+                <td data-label="Sent When">After offer acceptance</td>
+                <td data-label="What Candidate Receives">Induction date, time, venue, and list of documents to bring</td>
+            </tr>
+            <tr style="opacity:0.7;">
+                <td data-label="Notification"><strong>Onboarding Complete <span class="badge badge-gold" style="font-size:0.7rem;">🔜 Planned</span></strong></td>
+                <td data-label="Channel">💬 WhatsApp + 📧 Email</td>
+                <td data-label="Sent By">System / n8n</td>
+                <td data-label="Sent When">After Form 4 submission on induction day</td>
+                <td data-label="What Candidate Receives">Welcome to the team! Congratulations message + next steps</td>
+            </tr>
+        </tbody>
+    </table></div>
+</section>
+
+<!-- ═══════════════════════════ RULES ═══════════════════════════ -->
+<section id="rules">
+    <h2 class="section-title"><span class="icon">📌</span> Important Rules to Remember <span class="line"></span></h2>
+    <p class="lead">These rules apply to everyone using the system — candidates and HR alike.</p>
+
+    <div class="note-box danger">
+        <div class="note-icon">🚨</div>
+        <div class="note-content">
+            <h5>Rule 1 — Mobile Number is Permanent</h5>
+            <p>Once a candidate enters their mobile number in Form 1 (or Walk-In Form), it cannot be changed. All future forms (Form 2, Form 3, Form 4) must use this exact same number. Changing it will break all links between the candidate's records.</p>
+        </div>
+    </div>
+
+    <div class="note-box danger">
+        <div class="note-icon">🚫</div>
+        <div class="note-content">
+            <h5>Rule 2 — No Duplicate Mobile Numbers</h5>
+            <p>Two different candidates cannot use the same mobile number. The system treats each mobile number as a unique person. If a candidate tries to register with a number already in the system, it will be blocked.</p>
+        </div>
+    </div>
+
+    <div class="note-box warning">
+        <div class="note-icon">⚠️</div>
+        <div class="note-content">
+            <h5>Rule 3 — Form 2 Must Match Form 1</h5>
+            <p>For online candidates, the mobile number entered in Form 2 (on interview day at the office) must be identical to the number used in Form 1. Even a single digit difference will result in the forms not being linked and the interview cannot be found.</p>
+        </div>
+    </div>
+
+    <div class="note-box info">
+        <div class="note-icon">ℹ️</div>
+        <div class="note-content">
+            <h5>Rule 4 — Walk-In Candidates Skip Form 1 and Form 2</h5>
+            <p>Walk-in candidates do not fill Form 1 or Form 2. They go directly from the Walk-In Form to the interview (Form 3). The Walk-In Form plays the same role as Form 1 for them — it creates their initial record in the system.</p>
+        </div>
+    </div>
+
+    <div class="note-box success">
+        <div class="note-icon">✅</div>
+        <div class="note-content">
+            <h5>Rule 5 — Form 4 Works the Same for Both Paths</h5>
+            <p>Whether a candidate came online or as a walk-in, Form 4 works the same way. The selected candidate comes to the office and fills it. The system links it to their profile automatically using the mobile number.</p>
+        </div>
+    </div>
+
+    <div class="note-box info">
+        <div class="note-icon">💡</div>
+        <div class="note-content">
+            <h5>Rule 6 — HR Actions Only Through the Dashboard</h5>
+            <p>All HR actions — reviewing documents, scheduling interviews, conducting interviews, making decisions, sending messages — are done through the HR Dashboard. Candidates never have access to the dashboard.</p>
+        </div>
+    </div>
+
+    <div class="note-box warning">
+        <div class="note-icon">🎫</div>
+        <div class="note-content">
+            <h5>Rule 7 — QR Code is Single-Use Only</h5>
+            <p>Each QR code generated for interview check-in can only be scanned once. It expires within 24 hours of generation. Attempting to scan an already-used or expired QR code will show an error. For rescheduled interviews, a new QR code is generated automatically.</p>
+        </div>
+    </div>
+
+    <div class="note-box info">
+        <div class="note-icon">📅</div>
+        <div class="note-content">
+            <h5>Rule 8 — 30-Day Reapplication Rule</h5>
+            <p>A candidate cannot apply again (register with the same mobile number) within 30 days of their last application. The system enforces this automatically at Form 1 submission. This prevents duplicate applications from the same candidate within a short period.</p>
+        </div>
+    </div>
+
+    <div class="note-box warning">
+        <div class="note-icon">🔍</div>
+        <div class="note-content">
+            <h5>Rule 9 — Background Verification is Mandatory (Planned)</h5>
+            <p>Once implemented, ALL selected candidates must pass background verification before an offer letter is generated. This step cannot be bypassed by HR staff — only an HR Manager can extend the timeline in exceptional cases. If BG fails, the application is permanently closed.</p>
+        </div>
+    </div>
+
+    <div class="note-box info">
+        <div class="note-icon">📄</div>
+        <div class="note-content">
+            <h5>Rule 10 — Offer Letters Have a 7-Day Expiry (Planned)</h5>
+            <p>Once an offer letter is sent to a candidate, they have 7 days to accept or reject it online. If no response is received, the offer is automatically marked as expired. The HR Manager can extend the validity period if needed.</p>
+        </div>
+    </div>
+
+    <!-- Summary table -->
+    <h3 class="sub-title">📊 At-a-Glance: Online vs Walk-In Comparison</h3>
+    <div class="table-wrap"><table class="styled-table">
+        <thead>
+            <tr>
+                <th>Stage</th>
+                <th>🌐 Online Candidate</th>
+                <th>🚶 Walk-In Candidate</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-label="Stage">Entry Point</td>
+                <td data-label="🌐 Online Candidate">Job portal / LinkedIn link</td>
+                <td data-label="🚶 Walk-In Candidate">Directly walks into office</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">First Form</td>
+                <td data-label="🌐 Online Candidate">Form 1 (online)</td>
+                <td data-label="🚶 Walk-In Candidate">Walk-In Form (office, via QR)</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">Document Upload</td>
+                <td data-label="🌐 Online Candidate">Yes — in Form 1</td>
+                <td data-label="🚶 Walk-In Candidate">Not required at entry</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">HR Reviews Docs?</td>
+                <td data-label="🌐 Online Candidate">Yes — before scheduling</td>
+                <td data-label="🚶 Walk-In Candidate">No — goes straight to interview</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">Interview Scheduled?</td>
+                <td data-label="🌐 Online Candidate">Yes — HR schedules & sends WhatsApp</td>
+                <td data-label="🚶 Walk-In Candidate">No — interviews on the spot</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">Form 2 Required?</td>
+                <td data-label="🌐 Online Candidate">Yes — on interview day at office</td>
+                <td data-label="🚶 Walk-In Candidate">No — not required</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">Interview Form</td>
+                <td data-label="🌐 Online Candidate">Form 3</td>
+                <td data-label="🚶 Walk-In Candidate">Form 3 (same)</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">Decision Made By</td>
+                <td data-label="🌐 Online Candidate">HR Decision Panel</td>
+                <td data-label="🚶 Walk-In Candidate">HR Decision Panel (same)</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">Selection Notification</td>
+                <td data-label="🌐 Online Candidate">Email from HR</td>
+                <td data-label="🚶 Walk-In Candidate">Email from HR (same)</td>
+            </tr>
+            <tr>
+                <td data-label="Stage">Final Form</td>
+                <td data-label="🌐 Online Candidate">Form 4</td>
+                <td data-label="🚶 Walk-In Candidate">Form 4 (same)</td>
+            </tr>
+        </tbody>
+    </table></div>
+</section>
+
+<!-- ═══════════════════════════ FORM DETAILS ═══════════════════════════ -->
+<section id="form-details">
+    <h2 class="section-title"><span class="icon">📋</span> Every Form — Field-by-Field Explained <span class="line"></span></h2>
+    <p class="lead">This section explains exactly what each form collects, why each field is needed, and — most importantly — what smart logic happens automatically based on what you select.</p>
+
+    <!-- ════ FORM 1 ════ -->
+    <h3 class="sub-title" style="font-size:1.3rem; color:#f472b6; margin-top:36px;">📋 FORM 1 — Candidate Application Form (Online)</h3>
+    <p class="lead">Filled by the candidate from home / phone using the job portal link. Has <strong>4 steps</strong> built in.</p>
+
+    <div class="note-box info"><div class="note-icon">💡</div><div class="note-content"><h5>Step 1 — Mobile Number Verification</h5><p>The very first thing the candidate does is enter their 10-digit mobile number. The system checks if this number is new or has applied before. If the number already exists and is within the cooling-off period, the system shows a "Please apply after X days" message. If it's new, the candidate moves to Step 2.</p></div></div>
+
+    <h3 class="sub-title">Step 2 of Form 1 — Basic Details</h3>
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required?</th><th>What it means / Smart behaviour</th></tr></thead>
+        <tbody>
+            <tr><td data-label="Field">Mobile Number</td><td data-label="Type">Auto-filled (locked)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Shown from Step 1. Cannot be changed. This is the permanent unique ID.</td></tr>
+            <tr><td data-label="Field">First Name</td><td data-label="Type">Text</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Candidate's first name as it should appear on records.</td></tr>
+            <tr><td data-label="Field">Middle Name</td><td data-label="Type">Text</td><td data-label="Required?">Optional</td><td data-label="What it means / Smart behaviour">Middle name if applicable.</td></tr>
+            <tr><td data-label="Field">Last Name</td><td data-label="Type">Text</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Candidate's last/family name.</td></tr>
+            <tr><td data-label="Field">Email Address</td><td data-label="Type">Text</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Must be a valid email format (e.g. <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b6d8d7dbd3f6d2d9dbd7dfd898d5d9db">[email&#160;protected]</a>). System validates format automatically.</td></tr>
+            <tr><td data-label="Field">Gender</td><td data-label="Type">Dropdown</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Male / Female / Other.</td></tr>
+            <tr><td data-label="Field">Reference in Sampurna?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart:</strong> If candidate selects "Yes", a new field appears — "Referral Name". If "No", it stays hidden.</td></tr>
+            <tr><td data-label="Field">Referral Name</td><td data-label="Type">Text</td><td data-label="Required?">Only if "Yes" above</td><td data-label="What it means / Smart behaviour">Name of the person inside Sampurna who referred this candidate.</td></tr>
+            <tr><td data-label="Field">Preferred Language</td><td data-label="Type">Dropdown</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Hindi / English / Bengali. Sets communication preference.</td></tr>
+            <tr><td data-label="Field">Language Skills (Hindi / English / Bengali)</td><td data-label="Type">Checkboxes</td><td data-label="Required?">Optional</td><td data-label="What it means / Smart behaviour">For each language: can Read? can Write? can Speak? Three checkboxes per language.</td></tr>
+            <tr><td data-label="Field">Department</td><td data-label="Type">Dropdown (from DB)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart:</strong> Loaded live from database. When a department is selected, the Position dropdown below automatically updates to show only positions available under that department.</td></tr>
+            <tr><td data-label="Field">Position</td><td data-label="Type">Dropdown (filtered)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart:</strong> Changes based on which Department was selected. Example: Select "Operations" → positions like "Field Officer", "Branch Head", "Collection Agent" appear. Select "HR" → HR-related positions appear.</td></tr>
+            <tr><td data-label="Field">Do you have work experience?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart:</strong> If "Yes" — two new fields appear: Years of Experience + Months of Experience. If "No" — those fields stay hidden and 0 is recorded.</td></tr>
+            <tr><td data-label="Field">Years / Months of Experience</td><td data-label="Type">Number inputs</td><td data-label="Required?">Only if "Yes" above</td><td data-label="What it means / Smart behaviour">E.g., 2 years and 6 months. System calculates total months automatically.</td></tr>
+            <tr><td data-label="Field">Full Address</td><td data-label="Type">Text area</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Candidate's current residential address.</td></tr>
+            <tr><td data-label="Field">PIN Code</td><td data-label="Type">6-digit number</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart (Auto PIN Lookup):</strong> As soon as 6 digits are typed, the system automatically looks up State and District and fills them in. Candidate does not need to type State or District manually.</td></tr>
+            <tr><td data-label="Field">State</td><td data-label="Type">Auto-filled (locked)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Filled automatically from PIN code lookup. Cannot be edited manually.</td></tr>
+            <tr><td data-label="Field">District</td><td data-label="Type">Auto-filled / Dropdown</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Filled from PIN lookup. If multiple districts exist for a PIN, a dropdown appears to let candidate choose.</td></tr>
+            <tr><td data-label="Field">Skills</td><td data-label="Type">Multi-select + Custom</td><td data-label="Required?">Optional</td><td data-label="What it means / Smart behaviour">Candidate can pick from existing skill list in DB. Can also type and add custom skills not in the list.</td></tr>
+        </tbody>
+    </table></div>
+
+    <div class="note-box warning"><div class="note-icon">⚙️</div><div class="note-content"><h5>Key Smart Logic: Department → Position → Operations Questions</h5><p>When a candidate selects a Department that contains words like "Operations", "Field", "Collection", "Recovery" — the system marks it as an <strong>Operations Role</strong>. This unlocks a completely different set of questions in Step 3 (vehicle and loan details). Non-operations roles skip these entirely.</p></div></div>
+
+    <h3 class="sub-title">Step 3 of Form 1 — Extra Details & Document Upload</h3>
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required?</th><th>What it means / Smart behaviour</th></tr></thead>
+        <tbody>
+            <tr><td colspan="4" style="background:rgba(6,182,212,0.08); color:var(--cyan); font-weight:700; padding:12px 16px;" data-label="Field">💻 Computer Skills (shown to ALL candidates)</td></tr>
+            <tr><td data-label="Field">Do you know Excel?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart:</strong> If "Yes" — a slider appears for Excel Level: Basic / Intermediate / Advanced. If "No" — slider is hidden.</td></tr>
+            <tr><td data-label="Field">Excel Skill Level</td><td data-label="Type">Slider</td><td data-label="Required?">Only if Excel = Yes</td><td data-label="What it means / Smart behaviour">Basic / Intermediate / Advanced.</td></tr>
+            <tr><td data-label="Field">Having MS Office Skill?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Does the candidate know Microsoft Office (Word, PowerPoint, etc.)?</td></tr>
+            <tr><td data-label="Field">Basic Computer Skills?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Can the candidate use a computer for basic tasks?</td></tr>
+            <tr><td data-label="Field">Computer Certificate?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">Does the candidate hold any formal computer certificate (e.g. DCA, CCC)?</td></tr>
+
+            <tr><td colspan="4" style="background:rgba(242,24,125,0.08); color:#f472b6; font-weight:700; padding:12px 16px;" data-label="Field">🏍️ Vehicle & Loan Details (ONLY shown for Operations roles)</td></tr>
+            <tr><td data-label="Field">Do you have a bike?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes (Ops only)</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart:</strong> If "Yes" — three new fields appear: Bike Ownership, Vehicle Number. If "No" — instead shows: "Are you willing to buy a bike?" question.</td></tr>
+            <tr><td data-label="Field">Bike Ownership</td><td data-label="Type">Dropdown</td><td data-label="Required?">Only if Bike = Yes</td><td data-label="What it means / Smart behaviour">Self / Family / Friend / Company. Who owns the bike the candidate will use?</td></tr>
+            <tr><td data-label="Field">Vehicle Number</td><td data-label="Type">Text</td><td data-label="Required?">Only if Bike = Yes</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart Validation:</strong> System checks the format in real time. Must match Indian number plate format: e.g. MH01AB1234 (2 letters + 2 digits + 1-2 letters + 4 digits). Shows ✅ or ❌ instantly as candidate types.</td></tr>
+            <tr><td data-label="Field">Willing to buy a bike?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">Only if Bike = No</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart Rule:</strong> For operations roles, a candidate MUST either have a bike OR be willing to buy one. If both are "No", form cannot be submitted.</td></tr>
+            <tr><td data-label="Field">Do you have any loan?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes (Ops only)</td><td data-label="What it means / Smart behaviour">⚙️ <strong>Smart:</strong> If "Yes" — two new fields appear: Loan Type(s) + When do you plan to close it? If "No" — these stay hidden.</td></tr>
+            <tr><td data-label="Field">Loan Type(s)</td><td data-label="Type">Multi-select</td><td data-label="Required?">Only if Loan = Yes</td><td data-label="What it means / Smart behaviour">Options: Personal Loan / Home Loan / Car Loan / Education Loan / Other. Candidate can select multiple.</td></tr>
+            <tr><td data-label="Field">When do you plan to close it?</td><td data-label="Type">Text</td><td data-label="Required?">Only if Loan = Yes</td><td data-label="What it means / Smart behaviour">Free text. e.g. "Within 6 months", "Next year", etc.</td></tr>
+
+            <tr><td colspan="4" style="background:rgba(16,185,129,0.08); color:var(--green); font-weight:700; padding:12px 16px;" data-label="Field">📎 Documents (shown to ALL candidates)</td></tr>
+            <tr><td data-label="Field">Upload Resume</td><td data-label="Type">File upload</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">PDF, DOC, or DOCX. Maximum 3 MB. This is mandatory — form cannot be submitted without a resume.</td></tr>
+            <tr><td data-label="Field">Upload Certificates</td><td data-label="Type">File upload (multiple)</td><td data-label="Required?">Optional</td><td data-label="What it means / Smart behaviour">PDF, JPG, JPEG, PNG. Multiple files allowed. Education certificates, computer certificates, etc.</td></tr>
+
+            <tr><td colspan="4" style="background:rgba(124,58,237,0.08); color:#a78bfa; font-weight:700; padding:12px 16px;" data-label="Field">📋 Declaration</td></tr>
+            <tr><td data-label="Field">Declaration checkbox</td><td data-label="Type">Checkbox</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">"I declare the information provided is true." Must be ticked to submit.</td></tr>
+            <tr><td data-label="Field">Privacy Policy checkbox</td><td data-label="Type">Checkbox</td><td data-label="Required?">✅ Yes</td><td data-label="What it means / Smart behaviour">"I agree to the Privacy Policy and allow contact." Must be ticked to submit.</td></tr>
+        </tbody>
+    </table></div>
+
+    <div class="note-box success"><div class="note-icon">🎉</div><div class="note-content"><h5>Step 4 of Form 1 — Success Page</h5><p>After successful submission, the candidate sees a confirmation screen showing their unique Application ID (e.g. SAMP-00123). The status is set to <strong>FORM1_SUBMITTED</strong>. HR can now see this application in the dashboard.</p></div></div>
+
+    <!-- ════ FORM 2 ════ -->
+    <h3 class="sub-title" style="font-size:1.3rem; color:#67e8f9; margin-top:48px;">📝 FORM 2 — Office Entry / Screening Form</h3>
+    <p class="lead">Filled by the candidate <strong>at the office on interview day</strong> by scanning a QR code. Has 2 steps. This form can <strong>only be accessed</strong> if the candidate's status is "SCHEDULED" — meaning HR has already scheduled their interview.</p>
+
+    <h3 class="sub-title">Step 1 of Form 2 — Candidate Search</h3>
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Smart Behaviour / Rule</th></tr></thead>
+        <tbody>
+            <tr><td data-label="Field">Mobile Number</td><td data-label="Type">Text input</td><td data-label="Smart Behaviour / Rule">⚙️ Candidate types the same mobile number used in Form 1. System searches the database and retrieves their Form 1 application.</td></tr>
+        </tbody>
+    </table></div>
+
+    <div class="note-box danger"><div class="note-icon">🚨</div><div class="note-content"><h5>Smart Access Control — Form 2 Cannot Be Opened Unless Status = SCHEDULED</h5><p>The system checks the candidate's current status before showing the form. Here is what happens for each status:</p></div></div>
+
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Candidate Status</th><th>What the System Shows</th></tr></thead>
+        <tbody>
+            <tr><td data-label="Candidate Status"><span class="badge badge-gold">APPLIED</span></td><td data-label="What the System Shows">⏳ "Application Under Review — Form 2 will be available once your interview is scheduled."</td></tr>
+            <tr><td data-label="Candidate Status"><span class="badge badge-purple">UNDER_REVIEW</span></td><td data-label="What the System Shows">📋 "Our HR team is reviewing your application. Please wait."</td></tr>
+            <tr><td data-label="Candidate Status"><span class="badge badge-green">SCHEDULED</span></td><td data-label="What the System Shows">✅ Access Granted — candidate can proceed to fill Form 2 fields.</td></tr>
+            <tr><td data-label="Candidate Status"><span class="badge badge-cyan">INTERVIEWED</span></td><td data-label="What the System Shows">🎯 "Interview already completed — Form 2 is no longer needed."</td></tr>
+            <tr><td data-label="Candidate Status"><span class="badge badge-green">FORM2_ALREADY_COMPLETED</span></td><td data-label="What the System Shows">✅ "Form 2 was already submitted. No need to fill again."</td></tr>
+            <tr><td data-label="Candidate Status">Any other status</td><td data-label="What the System Shows">⚠️ "Cannot access Form 2. Please contact HR."</td></tr>
+        </tbody>
+    </table></div>
+
+    <h3 class="sub-title">Step 2 of Form 2 — Screening & Fitment Details</h3>
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required?</th><th>What it means</th></tr></thead>
+        <tbody>
+            <tr><td colspan="4" style="background:rgba(6,182,212,0.08); color:var(--cyan); font-weight:700; padding:12px 16px;" data-label="Field">👤 Personal & Demographic Information</td></tr>
+            <tr><td data-label="Field">Date of Birth</td><td data-label="Type">Date picker</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Candidate's DOB. Cannot be a future date. Defaults to 25 years ago as a starting point.</td></tr>
+            <tr><td data-label="Field">Marital Status</td><td data-label="Type">Dropdown</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Unmarried / Married / Divorced / Widowed / Other.</td></tr>
+            <tr><td data-label="Field">Father's Name</td><td data-label="Type">Text</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Full name of father as per official documents. Required for HR records and background verification.</td></tr>
+
+            <tr><td colspan="4" style="background:rgba(242,24,125,0.08); color:#f472b6; font-weight:700; padding:12px 16px;" data-label="Field">💼 Compensation & Job Fitment</td></tr>
+            <tr><td data-label="Field">Present CTC (Yearly, in INR)</td><td data-label="Type">Number</td><td data-label="Required?">Optional</td><td data-label="What it means">Current annual salary. Enter 0 if fresher or not disclosing. Used for salary benchmarking.</td></tr>
+            <tr><td data-label="Field">Expected CTC (Yearly, in INR)</td><td data-label="Type">Number</td><td data-label="Required?">Optional</td><td data-label="What it means">Candidate's expected annual salary for this role.</td></tr>
+            <tr><td data-label="Field">Notice Period (days)</td><td data-label="Type">Number (0–180)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">How many days of notice the candidate needs to serve with their current employer before joining. Default is 30 days.</td></tr>
+            <tr><td data-label="Field">Preferred Work Location / City</td><td data-label="Type">Text</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Where the candidate prefers to work. Helps HR decide branch allocation. e.g. Kolkata, Mumbai, Remote.</td></tr>
+            <tr><td data-label="Field">Willing to Relocate?</td><td data-label="Type">Dropdown (Yes/No)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Whether the candidate is open to working in a different city or location from their preference.</td></tr>
+
+            <tr><td colspan="4" style="background:rgba(16,185,129,0.08); color:var(--green); font-weight:700; padding:12px 16px;" data-label="Field">🆔 Identity Documents</td></tr>
+            <tr><td data-label="Field">Aadhaar Number</td><td data-label="Type">12-digit number</td><td data-label="Required?">✅ Yes (Mandatory)</td><td data-label="What it means">⚙️ <strong>Validation:</strong> Must be exactly 12 digits. Numbers only. System validates this before allowing submission.</td></tr>
+            <tr><td data-label="Field">PAN Number</td><td data-label="Type">10-character text</td><td data-label="Required?">Optional</td><td data-label="What it means">⚙️ <strong>Validation:</strong> If provided, must match Indian PAN format: 5 uppercase letters + 4 digits + 1 uppercase letter (e.g. ABCDE1234F). System validates format instantly.</td></tr>
+            <tr><td data-label="Field">Additional Remarks</td><td data-label="Type">Text area</td><td data-label="Required?">Optional</td><td data-label="What it means">HR can add screening notes or observations about the candidate for internal reference.</td></tr>
+        </tbody>
+    </table></div>
+
+    <!-- ════ FORM 3 ════ -->
+    <h3 class="sub-title" style="font-size:1.3rem; color:#c4b5fd; margin-top:48px;">🎤 FORM 3 — HR Interview Evaluation Form</h3>
+    <p class="lead">Filled by <strong>HR</strong> from the dashboard during the interview. Has <strong>5 steps</strong>. This is where the actual interview happens and scores are recorded.</p>
+
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Step</th><th>What HR Does</th><th>Fields / Smart Behaviour</th></tr></thead>
+        <tbody>
+            <tr>
+                <td data-label="Step"><strong>Step 1</strong><br/><span class="badge badge-pink">Search</span></td>
+                <td data-label="What HR Does">Find the candidate</td>
+                <td data-label="Fields / Smart Behaviour">HR types the candidate's mobile number. System fetches their profile from Form 1 and Form 2 data. If the number is not found or the candidate hasn't filled Form 2, an error is shown.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 2</strong><br/><span class="badge badge-purple">Position & Schedule</span></td>
+                <td data-label="What HR Does">Confirm position & interview details</td>
+                <td data-label="Fields / Smart Behaviour">
+                    <strong>Designation Name</strong> — Auto-filled from the candidate's Form 1. Cannot be changed.<br/>
+                    <strong>Position</strong> — Dropdown: HR selects the specific position within that designation.<br/>
+                    ⚙️ <strong>Interview Date</strong> — If already scheduled in the dashboard, auto-filled and locked. Otherwise HR picks a date (today to 90 days ahead).<br/>
+                    ⚙️ <strong>Interview Time</strong> — Auto-filled if already set, otherwise HR enters manually.<br/>
+                    ⚙️ <strong>Branch Name</strong> — Auto-filled from DB if set, otherwise HR types it.<br/>
+                    ⚙️ <strong>Interview Location</strong> — Auto-filled if set, otherwise HR types it (e.g. "Conference Room A").
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 3</strong><br/><span class="badge badge-cyan">Question Set</span></td>
+                <td data-label="What HR Does">Select question set</td>
+                <td data-label="Fields / Smart Behaviour">⚙️ <strong>Smart:</strong> The system loads question sets from the database that are specific to the selected designation and position. HR picks a set (e.g. "Set 1", "Set 2"). Each set has a different group of interview questions.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 4</strong><br/><span class="badge badge-gold">Evaluation</span></td>
+                <td data-label="What HR Does">Conduct interview & fill scores</td>
+                <td data-label="Fields / Smart Behaviour">
+                    Questions are shown one by one from the selected question set.<br/>
+                    For each question: HR sees the question text and the maximum marks (e.g. 10).<br/>
+                    ⚙️ <strong>Smart Marks Entry:</strong> HR can type marks as just a number (e.g. "7") OR in fraction format (e.g. "7/10"). System validates that marks do not exceed the maximum.<br/>
+                    <strong>Reference Name / Reference ID</strong> — Optional fields for tracking referrals.<br/>
+                    <strong>Overall Remarks</strong> — Required. HR writes a general comment about the candidate's performance.<br/>
+                    <strong>Evaluated By (HR Name)</strong> — Required. The name of the HR person conducting the interview.
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 5</strong><br/><span class="badge badge-green">Result</span></td>
+                <td data-label="What HR Does">View result summary</td>
+                <td data-label="Fields / Smart Behaviour">
+                    ⚙️ <strong>Auto-calculated:</strong> System totals all marks obtained vs. maximum marks, calculates percentage, and gives a performance label:<br/>
+                    70%+ = <span class="badge badge-green">Excellent</span><br/>
+                    50–69% = <span class="badge badge-cyan">Good</span><br/>
+                    Below 50% = <span class="badge badge-red">Needs Improvement</span><br/>
+                    Results are saved to database. Candidate status is updated to "EVALUATED".
+                </td>
+            </tr>
+        </tbody>
+    </table></div>
+
+    <!-- ════ FORM 4 ════ -->
+    <h3 class="sub-title" style="font-size:1.3rem; color:#6ee7b7; margin-top:48px;">✅ FORM 4 — Final Onboarding Form</h3>
+    <p class="lead">Filled by the <strong>selected candidate</strong> at the office after receiving the selection email. This is a comprehensive 10-step form that collects everything needed to set up the candidate as a new employee.</p>
+
+    <div class="note-box info"><div class="note-icon">🔒</div><div class="note-content"><h5>Read-Only Fields in Form 4</h5><p>Some fields in Form 4 are automatically pre-filled from Form 1 and Form 2 data and are <strong>locked (read-only)</strong> — the candidate cannot change them. These include: Name, Mobile Number, Email, Gender, Date of Birth, Father's Name, Aadhaar Number, PAN Number, Application ID, and current Status fields. This ensures data integrity across the entire system.</p></div></div>
+
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Step</th><th>Section Name</th><th>What is Collected</th></tr></thead>
+        <tbody>
+            <tr>
+                <td data-label="Step"><strong>Step 1</strong></td>
+                <td data-label="Section Name">Personal Information <span class="badge badge-red">Locked</span></td>
+                <td data-label="What is Collected">Name (First, Middle, Last), Mobile No, Email, Gender, Date of Birth, Father's Name, Aadhaar No, PAN No, Birth Country, Unique ID. <em>All pre-filled from Forms 1 & 2. Cannot be edited.</em></td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 2</strong></td>
+                <td data-label="Section Name">Correspondence Address</td>
+                <td data-label="What is Collected">Street No, Street Name, Block, Building, Post Office, Police Station, Landmark, District (auto from PIN), City, ZIP / PIN Code (auto-fills State & District), State (auto, locked), Country.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 3</strong></td>
+                <td data-label="Section Name">Permanent Address</td>
+                <td data-label="What is Collected">Same fields as Correspondence Address above. ⚙️ <strong>Smart:</strong> A "Same as Correspondence Address" checkbox auto-copies all fields from Step 2 — candidate doesn't have to type again if both addresses match.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 4</strong></td>
+                <td data-label="Section Name">Educational Qualifications</td>
+                <td data-label="What is Collected">Degree (dropdown from DB), Institution / University name, Year of Completion (current year ± 50 years, max 4 years into future), Percentage / CGPA. ⚙️ <strong>Smart:</strong> Multiple qualifications can be added using the "+ Add" button. Remove with "🗑️ Remove Last".</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 5</strong></td>
+                <td data-label="Section Name">Skills & Competencies</td>
+                <td data-label="What is Collected">Skill name (from master list), Proficiency level (Beginner / Intermediate / Advanced / Expert), Years of experience with that skill. Multiple skills can be added.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 6</strong></td>
+                <td data-label="Section Name">Work Experience</td>
+                <td data-label="What is Collected">Previous employer name, designation held, start date, end date, reason for leaving, responsibilities. Multiple work experience entries can be added.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 7</strong></td>
+                <td data-label="Section Name">Family Details</td>
+                <td data-label="What is Collected">Number of dependents, family members' names, relationship, age. Important for HR records and benefits calculation.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 8</strong></td>
+                <td data-label="Section Name">Bank Details</td>
+                <td data-label="What is Collected">Bank name, account number, IFSC code, account holder name, account type (Savings/Current). Required for salary processing.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 9</strong></td>
+                <td data-label="Section Name">Government IDs <span class="badge badge-red">Pre-filled</span></td>
+                <td data-label="What is Collected">Aadhaar Number and PAN Number shown (pre-filled from Form 2, locked). No editing allowed here.</td>
+            </tr>
+            <tr>
+                <td data-label="Step"><strong>Step 10</strong></td>
+                <td data-label="Section Name">Job Preferences</td>
+                <td data-label="What is Collected">Preferred department, preferred location, willingness to travel, any special accommodation requirements. Helps HR with role and branch assignment.</td>
+            </tr>
+        </tbody>
+    </table></div>
+
+    <div class="note-box success"><div class="note-icon">🎉</div><div class="note-content"><h5>After Form 4 Submission</h5><p>The candidate's status is updated to <strong>ONBOARDED</strong>. Their complete data flows into the HRMS (HR Management System) / Octane system. The recruitment cycle for this candidate is complete. HR can then generate the offer letter and set the joining date.</p></div></div>
+
+    <!-- ════ Walk-In Form ════ -->
+    <h3 class="sub-title" style="font-size:1.3rem; color:#fde68a; margin-top:48px;">🚶 Walk-In Form — Registration for Direct Visitors</h3>
+    <p class="lead">Filled by walk-in candidates at the office via QR code. Replaces Form 1 for candidates who didn't apply online.</p>
+
+    <div class="table-wrap"><table class="styled-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required?</th><th>What it means</th></tr></thead>
+        <tbody>
+            <tr><td data-label="Field">Mobile Number</td><td data-label="Type">Text (10 digits)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">⚙️ This becomes the candidate's permanent unique ID — same rule as Form 1. All future records (interview, Form 4) will link to this number.</td></tr>
+            <tr><td data-label="Field">Full Name</td><td data-label="Type">Text</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Candidate's full name.</td></tr>
+            <tr><td data-label="Field">Email</td><td data-label="Type">Text</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Valid email address.</td></tr>
+            <tr><td data-label="Field">Gender</td><td data-label="Type">Dropdown</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Male / Female / Other.</td></tr>
+            <tr><td data-label="Field">Department applied for</td><td data-label="Type">Dropdown</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">⚙️ Same Department dropdown as Form 1. Selection determines whether Operations-specific questions apply.</td></tr>
+            <tr><td data-label="Field">Position applied for</td><td data-label="Type">Dropdown</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">⚙️ Auto-filtered based on Department selected.</td></tr>
+            <tr><td data-label="Field">Address / City</td><td data-label="Type">Text</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">Current address or city of residence.</td></tr>
+            <tr><td data-label="Field">Reference in Sampurna?</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">✅ Yes</td><td data-label="What it means">⚙️ Same smart logic as Form 1 — shows Referral Name field if "Yes" is selected.</td></tr>
+            <tr><td data-label="Field">Do you have a bike? (Ops roles)</td><td data-label="Type">Radio (Yes/No)</td><td data-label="Required?">Ops only</td><td data-label="What it means">⚙️ Same vehicle and loan logic as Form 1 Step 3 — only shown if department is an Operations role.</td></tr>
+        </tbody>
+    </table></div>
+
+</section>
+
+<!-- ═══════════════════════════ PLANNED FEATURES SUMMARY ═══════════════════════════ -->
+<section id="planned">
+    <h2 class="section-title"><span class="icon">🔜</span> Planned Features — Development Roadmap <span class="line"></span></h2>
+    <p class="lead">These features are fully designed in the HLD and SRS documents but are not yet deployed. They represent the next phase of development for the Sampurna HR Portal.</p>
+
+    <div class="note-box info">
+        <div class="note-icon">📌</div>
+        <div class="note-content">
+            <h5>How to Read This Section</h5>
+            <p>The features below are documented, designed, and spec'd — but not yet live. When each feature goes live, the corresponding section in this manual will be updated to show <span class="badge badge-green">Live</span> status and this entry will be updated or removed.</p>
+        </div>
+    </div>
+
+    <div class="card-grid">
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">🔍</div><h4>Background Verification Module</h4></div>
+            <p>Post-selection BG check tracking with status management and document uploads.</p>
+            <ul>
+                <li>Initiate BG check for selected candidates</li>
+                <li>Track status: Pending → In Progress → Cleared / Failed</li>
+                <li>Upload and store verification documents</li>
+                <li>Auto-trigger offer generation on BG clearance</li>
+                <li>Automated rejection notification on BG failure</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">📄</div><h4>Offer Letter Generation</h4></div>
+            <p>Auto-generate PDF offer letters from templates and deliver via email.</p>
+            <ul>
+                <li>Pre-approved offer letter templates in database</li>
+                <li>Auto-fill candidate name, role, CTC, joining date</li>
+                <li>PDF generated and stored in Supabase Storage</li>
+                <li>Delivered via email with secure download link</li>
+                <li>7-day validity with expiry reminders</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">✅</div><h4>Online Offer Acceptance</h4></div>
+            <p>Candidate accepts or rejects offer via secure online portal link.</p>
+            <ul>
+                <li>Accept or reject offer with one click</li>
+                <li>Optional digital signature capture</li>
+                <li>Instant notification to HR on acceptance/rejection</li>
+                <li>Auto-trigger induction scheduling on acceptance</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">🏢</div><h4>Induction Day QR Check-in</h4></div>
+            <p>Second QR code for induction day to trigger Form 4 link delivery.</p>
+            <ul>
+                <li>Separate QR code generated for induction day</li>
+                <li>Candidate scans QR on first day → Form 4 link sent automatically</li>
+                <li>QR is single-use and time-limited (like interview QR)</li>
+                <li>Access logged with timestamp and device info</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">📊</div><h4>Analytics & Reporting Dashboard</h4></div>
+            <p>Real-time recruitment intelligence for HR managers.</p>
+            <ul>
+                <li>Pipeline funnel with stage-by-stage conversion</li>
+                <li>Time-to-hire metrics (average, median, by department)</li>
+                <li>Source effectiveness analysis</li>
+                <li>Interview quality scoring by panel</li>
+                <li>Export to CSV, Excel, PDF</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">🌐</div><h4>Multilingual Support</h4></div>
+            <p>Candidate-facing forms available in multiple languages.</p>
+            <ul>
+                <li>English (default)</li>
+                <li>Hindi (हिंदी)</li>
+                <li>Bengali (বাংলা)</li>
+                <li>Language selector on all candidate forms</li>
+                <li>Auto-detect browser language preference</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">💬</div><h4>WhatsApp Chatbot Initiation</h4></div>
+            <p>Candidate sends "Hi" to official WhatsApp number to start the application process.</p>
+            <ul>
+                <li>Candidate sends CV + "Hi" to WhatsApp number</li>
+                <li>Chatbot responds with personalized Form 1 link</li>
+                <li>Automated via n8n workflow automation</li>
+                <li>Supports media (QR image delivery via WhatsApp)</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">🔐</div><h4>Granular RBAC System</h4></div>
+            <p>Full role-based access control with 6 distinct user roles.</p>
+            <ul>
+                <li>Super Admin, HR Manager, Recruiter, Interviewer</li>
+                <li>Background Verifier, Compliance/Audit roles</li>
+                <li>JWT-based authentication (8-hour tokens)</li>
+                <li>Scope-limited data access per role</li>
+                <li>Audit log of all user actions</li>
+            </ul>
+        </div>
+        <div class="planned-card">
+            <div class="pcard-header"><div class="pcard-icon">📤</div><h4>HRMS / Octane Data Export</h4></div>
+            <p>Export onboarded candidate data to the Octane HRMS for formal employee record creation.</p>
+            <ul>
+                <li>Structured data export in CSV/JSON format</li>
+                <li>Manual trigger by HR after onboarding</li>
+                <li>Includes all Form 1–4 data</li>
+                <li>Direct API integration planned for Phase 2</li>
+            </ul>
+        </div>
+    </div>
+
+</section>
+
+</div><!-- /page -->
+
+<footer>
+    <p>📱 Sampurna HR Portal — Complete Process Guide &nbsp;|&nbsp; Version 3.0 &nbsp;|&nbsp; February 2026</p>
+    <p style="margin-top:8px; opacity:0.6;">This guide covers all live features and planned features per the HLD v2.1 and SRS v1.0. <span style="color:var(--green);">● Live</span> = deployed &nbsp;|&nbsp; <span style="color:var(--gold);">● 🔜 Planned</span> = designed but not yet deployed.</p>
+    <p style="margin-top:6px; opacity:0.4;">For technical support, contact your system administrator. For feature requests, contact the project manager.</p>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+            primaryColor: '#e3f2fd',
+            primaryTextColor: '#1a237e',
+            primaryBorderColor: '#90caf9',
+            lineColor: '#546e7a',
+            secondaryColor: '#f3e5f5',
+            tertiaryColor: '#fff9c4',
+            background: '#0D1120',
+            mainBkg: '#e3f2fd',
+            nodeBorder: '#90caf9',
+        
